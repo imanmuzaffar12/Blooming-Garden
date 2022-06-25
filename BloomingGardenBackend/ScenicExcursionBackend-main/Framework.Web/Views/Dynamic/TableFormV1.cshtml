@@ -1,0 +1,715 @@
+﻿@model Framework.Web.Models.DynamicPageModel
+@using Framework.Shared.Enums;
+@using Framework.Web.CommonCode.Helpers;
+<section class="overflow-hidden" id="dynamicScreen">
+    <div class="dashboard">
+        @if (Model.AllowAddEdit)
+        {
+            <div class="col-md-12">
+                <div id="addEditForm" class="content clear">
+                </div>
+            </div>
+        }
+        @if (Model.AllowSearchFilters)
+        {
+            string hiddenClass = Authentication.Instance.User != null && Authentication.Instance.User.RoleID == (int)RolesEnum.Admin ? string.Empty : "style=display:block;";
+            <form method="post" id="searchform" @hiddenClass>
+                <div class="col-md-12">
+                    <div id="search-filters" class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <label class="col-sm-1 col-form-label">Filters: </label>
+                                <div class="col-sm-11">
+                                    <input type="hidden" id="SearchTableName" name="SearchTableName" value="@Model.PageInfo.TableName" />
+                                    <input type="hidden" id="PageNo" name="PageNo" value="1" />
+                                    <input type="hidden" id="GridColumns" name="GridColumns" value="@Model.GridColumnsString" />
+                                    <input type="hidden" id="Condition" name="Condition" value="@Model.Condition" />
+                                    <input type="hidden" id="OrderBy" name="OrderBy" value="@Model.OrderBy" />
+                                    <input type="hidden" id="ExtenderName" name="ExtenderName" value="@Model.ExtenderName" />
+                                    <input type="hidden" id="ViewSelf" name="ViewSelf" value="@Model.ViewSelf.ToString().ToLower()" />
+                                    <input type="hidden" id="AllowApprovals" name="AllowApprovals" value="@Model.AllowApprovals.ToString().ToLower()" />
+                                    <input type="hidden" id="TableEntityID" name="TableEntityID" value="@(Model.PageInfo.EntityID.HasValue ? Model.PageInfo.EntityID.Value : 0)" />
+                                    @if (Model.DontLoadRecursiveData.HasValue)
+                                    {
+                                        <input type="hidden" id="DontLoadRecursiveData" name="DontLoadRecursiveData" value="@Model.DontLoadRecursiveData.Value.ToString()" />
+                                    }
+                                    @if (Model.ShowAllGridColumns.HasValue)
+                                    {
+                                        <input type="hidden" id="ShowAllGridColumns" name="ShowAllGridColumns" value="@Model.ShowAllGridColumns.Value.ToString()" />
+                                    }
+                                    <input type="hidden" id="GridTitle" name="GridTitle" value="@Model.GridTitle" />
+                                    <input type="hidden" id="ExcludeSearchColumns" name="ExcludeSearchColumns" value="@Model.ExcludeSearchColumns" />
+                                    <input type="hidden" id="AllowEdit" name="AllowEdit" value="@Model.AllowEdit.ToString()" />
+                                    <input type="hidden" id="AllowPreview" name="AllowPreview" value="@Model.AllowPreview.ToString()" />
+                                    <input type="hidden" id="AllowDelete" name="AllowDelete" value="@Model.AllowDelete.ToString()" />
+                                    <input type="hidden" id="DateFilters" name="DateFilters" value="@Model.DateFilters" />
+                                    <input type="hidden" id="CustomQuery" name="CustomQuery" value="@Model.CustomQuery" />
+                                    @foreach (var sfield in Model.PageInfo.SearchFieldDisplay.OrderBy(x => !x.IsString).ToList())
+                                    {
+                                        if (!string.IsNullOrEmpty(Model.ExcludeSearchColumns))
+                                        {
+                                            var ec = Model.ExcludeSearchColumns.Split(",".ToCharArray());
+                                            if (ec.Contains(sfield.Name))
+                                            {
+                                                continue;
+                                            }
+                                        }
+                                        if (!sfield.IsForeignkey)
+                                        {
+                                            @*<div class="col-sm-2" style="padding-left: 0;">
+                                                    <input class="form-control" type="text" placeholder="Search in all text fields." id="SearchTerm" name="SearchTerm" style="width:100% !important">
+                                                </div>*@
+                                        }
+                                        else
+                                        {
+                                            @*<div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>@sfield.DisplayName.Replace(" Id", "")</label>
+                                                        <select class="form-control" id="@sfield.Name" name="@sfield.Name">
+                                                            <option value="">@sfield.DisplayName.Replace(" Id", "")</option>
+                                                            @if (sfield.RefrencedTableData != null)
+                                                            {
+                                                                foreach (var dlOp in sfield.RefrencedTableData)
+                                                                {
+                                                                    sfield.TextColumnName = sfield.TextColumnName ?? sfield.ValueColumnName;
+                                                                    <option value="@dlOp[sfield.ValueColumnName]">@dlOp[sfield.TextColumnName]</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+                                            <div class="form-group bmd-form-group custom-control-inline">
+                                                <select class="form-control" id="@sfield.Name" name="@sfield.Name">
+                                                    <option value="">@sfield.DisplayName.Replace(" Id", "")</option>
+                                                    @if (sfield.RefrencedTableData != null)
+                                                    {
+                                                        foreach (var dlOp in sfield.RefrencedTableData)
+                                                        {
+                                                            sfield.TextColumnName = sfield.TextColumnName ?? sfield.ValueColumnName;
+                                                            <option value="@dlOp[sfield.ValueColumnName]">@dlOp[sfield.TextColumnName]</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        }
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.DateFilters))
+                                    {
+                                        <div class="col-sm-2" style="padding-left: 0;">
+                                            <label>From Date</label>
+                                            <input class="form-control" type="date" placeholder="From Date" id="FromDate" name="FromDate" style="width:100% !important">
+                                        </div>
+                                        <div class="col-sm-2" style="padding-left: 0;">
+                                            <label>To Date</label>
+                                            <input class="form-control" type="date" placeholder="To Date" id="ToDate" name="ToDate" style="width:100% !important">
+                                        </div>
+                                    }
+                                    @if (Model.PageInfo.SearchFieldDisplay != null && Model.PageInfo.SearchFieldDisplay.Count > 1)
+                                    {
+                                        <div class="form-group bmd-form-group custom-control-inline">
+                                            <input type="button" id="btnSearch" class="btn btn-group btn-default" style="margin-top: -2px;" value="Search">
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        }
+        @if (Model.AllowListingGrid)
+        {
+            <div class="col-md-12">
+                <div class="col-12 col-lg-auto">
+                    <div class="row">
+                        <div class="col-md-8">
+                            @if (!string.IsNullOrEmpty(Model.PageInfo.PageTitle.Trim()))
+                            {
+                                <h4 class="card-title">@Model.PageInfo.PageTitle.Sentencify()</h4>
+                            }
+                        </div>
+                        @if (Model.AllowAddEdit)
+                        {
+                            <div class="col-md-4">
+                                <div class="d-flex flex-wrap fa-pull-right">
+                                    <a id="btnNew" class="mt-4 mt-sm-0 ml-sm-4 reportrange-btn btn btn-sm btn-circle warning-gradient lead-1 text-secondary">
+                                        <span class="icon-plus mr--1"></span>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header card-header-rose card-header-icon">
+                        <a id="btnNew" style="color:#fff;cursor: pointer;" class="card-icon" title="Add New @Model.PageInfo.TableName.Singlofy().Sentencify()">
+                        </a>
+
+                    </div>
+                    <div class="dataTables_wrapper" id="listings">
+                        <div class="table-responsive">
+                            @{
+                                Html.RenderPartial("_TableListing", Model);
+                            }
+                        </div>
+                    </div>
+                    <div id="message2" class="m-bottom m-top"></div>
+                </div>
+            </div>
+        }
+        @{
+            string addEditURl = "";
+            if (Model.DontLoadRecursiveData.HasValue)
+            {
+                addEditURl = string.Format("/Dynamic/AddEditTableRecord?tableName={0}&excludeAddEditColumns={1}&extenderName={2}&dontLoadRecursiveData={3}&allowApprovals={4}&tableEntityID={5}&id=", Model.TableName, Model.ExcludeAddEditColumns, Model.ExtenderName, Model.DontLoadRecursiveData.Value, Model.AllowApprovals.Value.ToString().ToLower(), Model.PageInfo.EntityID);
+            }
+            else
+            {
+                addEditURl = string.Format("/Dynamic/AddEditTableRecord?tableName={0}&excludeAddEditColumns={1}&extenderName={2}&allowApprovals={3}&tableEntityID={4}&id=", Model.TableName, Model.ExcludeAddEditColumns, Model.ExtenderName, Model.AllowApprovals.Value.ToString().ToLower(), Model.PageInfo.EntityID);
+            }
+        }
+        @if (!Model.DontRenderJavaScript)
+        {
+            <script>
+                toastr.options = {
+                    "debug": false,
+                    "positionClass": "toast-bottom-right",
+                    "onclick": null,
+                    "fadeIn": 300,
+                    "fadeOut": 1000,
+                    "timeOut": 2000,
+                    "extendedTimeOut": 1000
+                };
+            function beforeSearch(){};
+            function allowAddEditFormSlideUp(){
+                return true;
+            };
+            $(document).ready(function () {
+                if(allowAddEditFormSlideUp()){
+                    $("#addEditForm").slideUp(500);
+                }
+                $("#btnSearch").click(function(){
+                    //console.log("Loading page");
+                    beforeSearch();
+                    //console.log("Loading page");
+                    loadPage(1, function(){
+                        $("#listing_table").dataTable();
+                    });
+                    //loadPage(1, function(){
+                       // refreshPager();
+                   // });
+                    return false;
+                });
+                $("[relf-show]").each(function(){
+                    $(this).click(function(){
+                        var at = $(this).attr("relf-show");
+                        $("#pk_"+ at).slideToggle(500);
+                        $(this).toggleClass("btn-gray");
+                        if($(this).find("span").html() == "Show"){
+                            $(this).find("span").html("Hide")
+                        }
+                        else{
+                            $(this).find("span").html("Show")
+                        }
+                    });
+                });
+                $("#btnNew").click(function () {
+                    addEditForm('@Model.PageInfo.TableName', 0);
+                    $("#IsNew").val("true");
+                });
+                $("[relf-edit]").each(function () {
+                        $(this).click(function () {
+                            var id = $(this).attr("relf-edit");
+                            addEditForm('@Model.PageInfo.TableName', id);
+                            $("#IsNew").val("false");
+                            return false;
+                        });
+                    });
+                $("[relf-delete]").each(function () {
+                    $(this).unbind("click");
+                    $(this).click(function () {
+                        DeleteConfirm(this);
+                        @*if(confirm("Do you want to delete this record?")){
+                            var id = $(this).attr("relf-delete");
+                            var col = $(this).attr("relf-column");
+                            deleteRecord('@Model.PageInfo.TableName', id, col,$("#ExtenderName").val());
+                        }*@
+                        //return false;
+                    });
+                });
+                $("[relf-sortable]").each(function () {
+
+                    $("#"+$(this).attr("id")).sortable({
+                        items: "li:not(.ui-state-disabled)"
+                    });
+                    $("#" + $(this).attr("id")).disableSelection();
+                    //console.log($(this).attr("id"));
+                });
+                //refreshPager();
+            });
+            function deleteRecord(tableName, id, colName,extndname){
+                var jqxhr = $.ajax({
+                    type: "get",
+                    url: "/Dynamic/DeleteRecord?tableName="+tableName +"&id="+id + "&fieldName="+colName+"&extenderName="+extndname
+                })
+                .done(function (data) {
+                    if(data.Success == true){
+                        var row = $("[relf-delete='"+ id +"']").parent().parent();
+                        row.css("background-color", "Red");
+                        // showMessage(data.Message, false);
+                        row.fadeOut(800, function () {
+                            //Remove GridView row
+                            row.slideUp(400);
+                            //console.log($("#listing_table").find("tr:visible").length);
+                            if($("#listing_table").find("tr:visible ").length == 1){
+                                $("#listing_table").slideUp(400);
+                                if($("#listing .no-results").length == 0){
+                                    $("#listings").append("<div class='no-results'>No search result</div>");
+                                }
+
+                            }
+                            pageLoaded();
+                        });
+                        swal("Deleted!", "Record has been deleted!", "success");
+                    }
+                    else{
+                        swal("Error!", data.Message, "error");
+                    }
+                })
+                    .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                        swal("Error!", errorThrown, "error");
+                })
+               .always(function () { });
+            };
+            function addEditForm(tableName, id) {
+                if (tableName == 'Items') {
+                    id = id == "0" ? '' : id;
+                    location.href = '/admin/business/items/create?itemID=' + id;
+                    return;
+                }
+                //console.log("AddEdit is called...");
+                $("#addEditForm").slideUp(300, function(){
+                    var jqxhr = $.ajax({
+                        type: "get",
+                        url: "@Html.Raw(addEditURl)"+id
+                    })
+                     .done(function (data) {
+                         $("#btnTrigger").click();
+                         $("#addEditForm").html(data);
+                         $("#addEditForm").slideDown(400, function(){
+                             //console.log("slided down from AddEdit");
+                         });
+                         $("#btnNew").slideUp(400);
+                         if (id === 0) {
+                             $("#IsNew").val("true");
+                             $("#btnAction").val("Save");
+                         }
+                         else{
+                             $("#IsNew").val("false");
+                             $("#btnAction").val("Update");
+                         }
+                         $("[relf-button='remove_preivew']").click(function(){
+                             var optId = $(this).attr("optid");
+                             $("#FilePreview_"+optId).hide();
+                             $("#FileUpload_"+optId).show();
+                             $("#fileID_"+optId).html("");
+                             $("#fileID_"+optId).attr("href","");
+                             $("#"+($("#uploading_"+optId).attr("relf-creative-id-field"))).val("");
+                             $("#"+($("#uploading_"+optId).attr("relf-creative-url-field"))).val("");
+                         });
+                         $("#btnCancel").click(function(){
+                             $("#addEditForm").slideUp(400);
+                             $("#btnNew").slideDown(500);
+                             $("#ClosePopUp").click();
+
+                         });
+                         $("#btnAction").click(function () {
+                             saveUpdateTableRecord();
+                             if (id === 0) {
+                                 $("#IsNew").val("true");
+                                 $("#btnAction").val("Save");
+                             }
+                             else{
+                                 $("#IsNew").val("false");
+                                 $("#btnAction").val("Update");
+                             }
+                             validatDetailFormForm();
+                             loadPage(1, function(){
+                               $("#listing_table").dataTable();
+                             });
+                             $("#ClosePopUp").click();
+                             return false;
+                         });
+                         applyNumeric();
+
+                         $('[name$="Ar"]').css("direction", "rtl");
+                         formLoaded();
+                         $("html, body").animate({ scrollTop: 0 }, "slow");
+                         //$('.ps-container').scrollTop(0).perfectScrollbar('update');
+                     })
+                        .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                            ShowErrorMessage(errorThrown);
+                     })
+                     .always(function () { });
+                });
+            };
+            function formLoaded(){};
+            function pageLoaded(){};
+            function beforeSave(){};
+            function checkIsForValidToPost(){
+                return true;
+            };
+            function validateCustomeControls(){};
+                function saveUpdateTableRecord() {
+                $("input:checkbox").each(function () {
+                    var relf = $(this).attr("relf");
+                    $("#"+ relf).val($(this).prop("checked"));
+                });
+                validatDetailFormForm();
+                validateCustomeControls();
+
+                if(!$("#detailForm").valid()){
+                    checkIsForValidToPost();
+                    return false;
+                }
+                beforeSave();
+
+                if(!checkIsForValidToPost()){
+                    return false;
+                }
+                var jqxhr = $.ajax({
+                    type: "POST",
+                    data: $("#detailForm").serialize(),
+                    url: "/Dynamic/SaveUpdateTableRecord"
+                })
+                   .done(function (data) {
+                       if (data.Success == true) {
+                           if('@Model.ShowAddNewButton.ToString().ToLower()' == 'true'){
+                               $("#addEditForm").slideUp(400);
+                               $("#btnNew").slideDown(500);
+                           }
+                           else{
+                               $("#btnNew").click();
+                           }
+                           //$('.ps-container').scrollTop(0).perfectScrollbar('update');
+                           //loadPage(1, function(){
+                            //   refreshPager();
+                           //});
+                           toastr.success(data.Message);
+                       }
+                       else
+                       {
+                           toastr.error(data.Message);
+
+                       }
+                   })
+                   .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                       ShowErrorMessage(errorThrown, true);
+                   })
+                   .always(function () { return false; });
+            };
+            function refreshPager() {
+                $("#pager").paginate({
+                    count: $("#totalrecords").val() / 20,//20 is pageSize
+                    start: 1,
+                    display: 10,
+                    border: false,
+                    text_color: '#79B5E3',
+                    background_color: 'none',
+                    text_hover_color: '#2573AF',
+                    background_hover_color: 'none',
+                    images: false,
+                    mouse: 'press',
+                    onChange: function (page) {
+                        loadPage(page, function () { });
+                    }
+                });
+            };
+            function hashUrl(hash) {
+                var currentURL = window.location;
+                currentURL.hash = hash;
+                window.location = currentURL;
+            };
+            function loadPage(page, callback) {
+                //console.log("Loading form funct");
+                $("#PageNo").val(page);
+                if (Math.floor(page) == page && $.isNumeric(page)) {
+                    hashUrl("page_" + page);
+                } else {
+                    hashUrl("page_");
+                }
+                var jqxhr = $.ajax({
+                    type: "POST",
+                    data: $("#searchform").serialize(),
+                    url: "/Dynamic/TableListing"
+                })
+                .done(function (data) {
+                    //console.log("Loaded data");
+                    $("#listings").html(data);
+                    pageLoaded();
+                    $("[relf-show]").each(function(){
+                        $(this).click(function(){
+                            var at = $(this).attr("relf-show");
+                            $("#pk_"+ at).slideToggle(500);
+                            $(this).toggleClass("btn-gray");
+                            if($(this).find("span").html() == "Show"){
+                                $(this).find("span").html("Hide")
+                            }
+                            else{
+                                $(this).find("span").html("Show")
+                            }
+                        });
+                    });
+                    $("[relf-edit]").each(function () {
+                        $(this).click(function () {
+                            var id = $(this).attr("relf-edit");
+                            addEditForm('@Model.PageInfo.TableName', id);
+                            $("#IsNew").val("false");
+                            return false;
+                        });
+                    });
+                    $("[relf-sortable]").each(function () {
+                        $("#"+$(this).attr("id")).sortable({
+                            items: "li:not(.ui-state-disabled)"
+                        });
+                        $("#" + $(this).attr("id")).disableSelection();
+                        //console.log($(this).attr("id"));
+                    });
+                    $("[relf-delete]").each(function () {
+                        $(this).click(function () {
+                            DeleteConfirm(this);
+                            @*if(confirm("Do you want to delete this record?")){
+                                var id = $(this).attr("relf-delete");
+                                var col = $(this).attr("relf-column");
+                                deleteRecord('@Model.PageInfo.TableName', id, col,$("#ExtenderName").val());
+                            }*@
+                            //return false;
+                        });
+                    });
+                    callback();
+
+                })
+                .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                    ShowErrorMessage(errorThrown, true);
+                })
+                .always(function () { });
+            }
+            function numericOnly(ctlId){
+                $('#'+ctlId).attr("maxlength","12");
+                $('#'+ctlId).on('keydown keypress keyup paste input', function () {
+                    while (($(this).val().split(".").length - 1) > 1) {
+
+                        $(this).val($(this).val().slice(0, -1));
+
+                        if (($(this).val().split(".").length - 1) > 1) {
+                            continue;
+                        } else {
+                            return false;
+                        }
+
+                    }
+                    $(this).val($(this).val().replace(/[^0-9.-]/g, ''));
+                    var int_num_allow = 10;
+                    var float_num_allow = 4;
+
+                    var iof = $(this).val().indexOf(".");
+
+                    if (iof != -1) {
+                        if ($(this).val().substring(0, iof).length > int_num_allow) {
+                            $(this).val('');
+                            // you can remove the placeholder modification if you like
+                            $(this).attr('placeholder', 'invalid number');
+                        }
+
+                        $(this).val($(this).val().substring(0, iof + float_num_allow + 1));
+
+                    } else {
+
+                        $(this).val($(this).val().substring(0, int_num_allow));
+
+                    }
+
+                    return true;
+
+                });
+            };
+            function numericOnlyIntegar(ctlId){
+                $('#'+ctlId).attr("maxlength","12");
+                $('#'+ctlId).on('keydown keypress keyup paste input', function () {
+                    while (($(this).val().split(".").length - 1) > 1) {
+
+                        $(this).val($(this).val().slice(0, -1));
+
+                        if (($(this).val().split(".").length - 1) > 1) {
+                            continue;
+                        } else {
+                            return false;
+                        }
+
+                    }
+                    $(this).val($(this).val().replace(/[^0-9]/g, ''));
+                    var int_num_allow = 10;
+                    var float_num_allow = 4;
+
+                    var iof = $(this).val().indexOf(".");
+
+                    if (iof != -1) {
+                        if ($(this).val().substring(0, iof).length > int_num_allow) {
+                            $(this).val('');
+                            // you can remove the placeholder modification if you like
+                            $(this).attr('placeholder', 'invalid number');
+                        }
+
+                        $(this).val($(this).val().substring(0, iof + float_num_allow + 1));
+
+                    } else {
+
+                        $(this).val($(this).val().substring(0, int_num_allow));
+
+                    }
+
+                    return true;
+
+                });
+            };
+            </script>
+            <script>
+            $(document).ready(function(){
+                if($("[relf-sortable]").length == 0){
+                    $("#btnUpdateOrder").hide();
+                    $("#btnResetOrder").hide();
+                }else{
+                    $("#btnUpdateOrder").show();
+                    $("#btnResetOrder").show();
+                }
+                $("#btnUpdateOrder").click(function(){
+                    var pks = [];
+                    $("[relf-pkvalue]:visible").each(function(){
+                        var pk = $(this).attr("relf-pkvalue");
+                        pks.push(pk);
+                    });
+                    var jqxhr = $.ajax({
+                        type: "POST",
+                        data: {TableName:"@Model.TableName", OrderedPKs: pks.join(",")},
+                        url: "/Dynamic/UpdateDisplayOrders"
+                    })
+                   .done(function (data) {
+                       loadPage(1,function(){
+                           showMessages("Display information is updated successfully.", false, "message2", 5000);
+                       });
+
+                   });
+                });
+                $("#btnResetOrder").click(function(){
+
+                    var jqxhr = $.ajax({
+                        type: "POST",
+                        data: {TableName:"@Model.TableName"},
+                        url: "/Dynamic/ResetDisplayOrders"
+                    })
+                   .done(function (data) {
+                       loadPage(1,function(){
+                           showMessages("Display information is reset successfully.", false, "message2", 5000);
+                       });
+
+                   });
+                });
+                $(".close").click(function(){
+                    $("#btnNew").slideDown(500);
+                });
+            });
+
+            </script>
+            <script>
+            function applyNumeric(){
+                @foreach (var field in Model.PageInfo.Fields.Where(x => !(x.IsGroup.HasValue && x.IsGroup.Value) && (x.IsDecimal || x.IsInt16 || x.IsInt32 || x.IsInt64)).ToList())
+            {
+                if (field.IsDecimal)
+                {
+             @:numericOnly('@field.ColumnName');
+                                                                                                                                                                                                                                                                                 }
+                else
+                {
+             @:numericOnlyIntegar('@field.ColumnName');
+
+                }
+            }
+            }
+            function validatDetailFormForm() {
+                $("#detailForm").validate({
+                    rules: {
+                        @foreach (var field in Model.PageInfo.Fields.Where(x => !(x.IsGroup.HasValue && x.IsGroup.Value)).ToList())
+                    {
+                        field.MaxLength = (field.IsInt16 || field.IsInt32 || field.IsInt64) ? (short)6 : field.MaxLength;
+                        field.MaxLength = field.IsDateTime ? (short)15 : field.MaxLength;
+                        if (field.IsRequired && !field.IsBoolean)
+                        {
+                            @:@field.Name:{required:true, maxlength:@(field.MaxLength - 1)},
+                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                    }
+                    },
+                    messages: {
+                        @foreach (var field in Model.PageInfo.Fields.Where(x => !(x.IsGroup.HasValue && x.IsGroup.Value)).ToList())
+                        {
+                            if (field.IsRequired && !field.IsBoolean)
+                            {
+                                @:@field.Name:{required:'@field.DisplayName is required.', maxlength:'@field.DisplayName max length is @(field.MaxLength - 1) characters.'},
+                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                        }
+                    },
+                    errorElement: "div",
+                    focusInvalid: true
+
+                });
+                jQuery.validator.addMethod('selectcheck', function (value) {
+                    return (value != '0');
+                });
+            };
+
+            </script>
+            <script>
+            window.uploadDone = function (id, creativeid, creativeurl, errorMessage, thumbnailCreativeID, thumbnailURL) {
+                $("#uploading_" + id).hide();
+                if (creativeurl.length != 0) {
+                    var groupID = "#uploading_" + id;
+                    $("#" + $(groupID).attr("relf-creative-id-field")).val(creativeid);
+                    $("#" + $(groupID).attr("relf-creative-url-field")).val(creativeurl);
+                    $("#fileID_" + id).attr("href", creativeurl);
+                    $("#fileID_" + id).html(creativeurl);
+                    $("#FileUpload_" + id).hide();
+                    $("#FilePreview_" + id).show();
+                }
+            };
+            window.uploadingStarted = function (id) {
+                $("#uploading_" + id).show();
+            };
+            $(document).ready(function () {
+                $(".icon.next").html(">>");
+                $(".icon.prev").html("<<");
+            });
+            function DeleteConfirm(el) {
+	            swal({
+		            title: "Are you sure, you want to delete?",
+		            text: "You will not be able to recover this record!",
+		            type: "warning",
+		            showCancelButton: true,
+		            confirmButtonColor: '#DD6B55',
+		            confirmButtonText: 'Yes, delete it!',
+		            cancelButtonText: "No, cancel it!",
+		            closeOnConfirm: false,
+		            closeOnCancel: false
+                }).then(function (isConfirm) {
+                    if (isConfirm.value == true) {
+                        var id = $(el).attr("relf-delete");
+                        var col = $(el).attr("relf-column");
+                        var response = deleteRecord('@Model.PageInfo.TableName', id, col, $("#ExtenderName").val());
+                    } else {
+                        swal("Cancelled", "Record is safe :)", "error");
+                    }
+	            });
+            }
+            </script>
+        }
+    </div>
+</section>

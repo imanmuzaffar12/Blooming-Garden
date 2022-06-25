@@ -1,0 +1,48 @@
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\SmartSchool.CP.Application.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\SmartSchool.CP.Application.pdb
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\SmartSchool.Shared.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\log4net.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.Mvc.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\CreativeServices.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\NLog.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\ServiceStack.Interfaces.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\ServiceStack.Redis.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.Razor.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.WebPages.Razor.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.WebPages.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\Microsoft.Web.Infrastructure.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\ServiceStack.Common.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.WebPages.Deployment.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\SmartSchool.Shared.pdb
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.Mvc.xml
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.Razor.xml
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.WebPages.Razor.xml
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.WebPages.xml
+F:\Bits Collision\SmartSchool\CMS.CP.Application\bin\Release\System.Web.WebPages.Deployment.xml
+F:\Bits Collision\SmartSchool\CMS.CP.Application\obj\Release\SmartSchool.CP.Application.csprojResolveAssemblyReference.cache
+F:\Bits Collision\SmartSchool\CMS.CP.Application\obj\Release\SmartSchool.CP.Application.dll
+F:\Bits Collision\SmartSchool\CMS.CP.Application\obj\Release\SmartSchool.CP.Application.pdb
+F:\Development\smartschool\CMS.CP.Application\bin\Release\SmartSchool.CP.Application.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\SmartSchool.CP.Application.pdb
+F:\Development\smartschool\CMS.CP.Application\bin\Release\SmartSchool.Shared.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\log4net.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.Mvc.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\CreativeServices.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\NLog.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\ServiceStack.Interfaces.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\ServiceStack.Redis.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.Razor.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.WebPages.Razor.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.WebPages.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\Microsoft.Web.Infrastructure.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\ServiceStack.Common.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.WebPages.Deployment.dll
+F:\Development\smartschool\CMS.CP.Application\bin\Release\SmartSchool.Shared.pdb
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.Mvc.xml
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.Razor.xml
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.WebPages.Razor.xml
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.WebPages.xml
+F:\Development\smartschool\CMS.CP.Application\bin\Release\System.Web.WebPages.Deployment.xml
+F:\Development\smartschool\CMS.CP.Application\obj\Release\SmartSchool.CP.Application.csprojResolveAssemblyReference.cache
+F:\Development\smartschool\CMS.CP.Application\obj\Release\SmartSchool.CP.Application.dll
+F:\Development\smartschool\CMS.CP.Application\obj\Release\SmartSchool.CP.Application.pdb

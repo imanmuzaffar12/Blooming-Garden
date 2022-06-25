@@ -1,0 +1,271 @@
+﻿@using Framework.Shared.DataServices
+@using Framework.Web.Models
+@using Framework.Web.CommonCode.Helpers
+@using Framework.Shared.Enums;
+
+@model DashboardModel
+@{
+    ViewBag.Title = "";
+}
+<style>
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 40%;
+    }
+</style>
+<div class="overflow-hidden">
+    <div id="dashboard">
+        <!-- content-header -->
+        <div class="row flex-wrap align-items-center px-6 py-5">
+            <div class="col">
+                <div class="text-light pb-5 pb-lg-0 mr-auto">
+                    <h2 class="fw-100 mb-0">Dashboard</h2>
+                </div>
+            </div>
+        </div>
+        <!-- /.content-header -->
+        <div class="container-fluid p-0">
+            <img src="~/Images/coming-soon.png" class="center" />
+        </div>
+        <div class="container-fluid p-0">
+            @if (Authentication.Instance.User != null && Authentication.Instance.User.RoleID == (int)RolesEnum.Merchants)
+            {
+                if (Model != null && Model.DashboardSummary != null && Model.DashboardSummary.Count != 0)
+                {
+                    var NoOfBranches = Model.DashboardSummary.Where(x => x.ColumnName == "NoOfBranches").FirstOrDefault();
+                    var NetPoints = Model.DashboardSummary.Where(x => x.ColumnName == "NetPoints").FirstOrDefault();
+                    var SentPoints = Model.DashboardSummary.Where(x => x.ColumnName == "SentPoints").FirstOrDefault();
+                    var ReceivedPoints = Model.DashboardSummary.Where(x => x.ColumnName == "ReceivedPoints").FirstOrDefault();
+                    var NoOfUsers = Model.DashboardSummary.Where(x => x.ColumnName == "NoOfUsers").FirstOrDefault();
+                    var ExpiryDate = Model.DashboardSummary.Where(x => x.ColumnName == "ExpiryDate").FirstOrDefault();
+                    <!-- panel-card -->
+                    <div class="card-row row no-gutters">
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@NoOfBranches.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@NoOfBranches.CountNo </h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-building"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@NetPoints.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@NetPoints.CountNo</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-coins"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@SentPoints.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@(!string.IsNullOrEmpty(SentPoints.CountNo) ? SentPoints.CountNo : "0")</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="far fa-paper-plane"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@ReceivedPoints.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@(!string.IsNullOrEmpty(ReceivedPoints.CountNo) ? ReceivedPoints.CountNo : "0")</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-wallet"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@NoOfUsers.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@NoOfUsers.CountNo</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-users"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@ExpiryDate.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@DateTime.Parse(ExpiryDate.CountNo).ToString("dd/MM/yyyy")</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-calendar"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-card -->
+                }
+            }
+            else
+            {
+                if (Model != null && Model.DashboardSummary != null && Model.DashboardSummary.Count != 0)
+                {
+                    var NoOfBusinesses = Model.DashboardSummary.Where(x => x.ColumnName == "NoOfBusinesses").FirstOrDefault();
+                    var NoOfBranches = Model.DashboardSummary.Where(x => x.ColumnName == "NoOfBranches").FirstOrDefault();
+                    var NetPoints = Model.DashboardSummary.Where(x => x.ColumnName == "NetPoints").FirstOrDefault();
+                    var SentPoints = Model.DashboardSummary.Where(x => x.ColumnName == "SentPoints").FirstOrDefault();
+                    var ReceivedPoints = Model.DashboardSummary.Where(x => x.ColumnName == "ReceivedPoints").FirstOrDefault();
+                    var NoOfUsers = Model.DashboardSummary.Where(x => x.ColumnName == "NoOfUsers").FirstOrDefault();
+                    <!-- panel-card -->
+                    <div class="card-row row no-gutters">
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@NoOfBusinesses.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@NoOfBusinesses.CountNo</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-bank"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@NoOfBranches.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@NoOfBranches.CountNo </h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-building"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@NetPoints.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@NetPoints.CountNo</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-coins"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@SentPoints.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@(!string.IsNullOrEmpty(SentPoints.CountNo) ? SentPoints.CountNo : "0")</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="far fa-paper-plane"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@ReceivedPoints.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@(!string.IsNullOrEmpty(ReceivedPoints.CountNo) ? ReceivedPoints.CountNo : "0")</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-wallet"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-item col-lg-6 col-md-6">
+                            <div class="main-card card text-light flex-wrap align-items-center h-100 shadow-1">
+                                <div class="flex-1">
+                                    <span>@NoOfUsers.ColumnName.Sentencify()</span>
+                                    <h3 class="mb-0">@NoOfUsers.CountNo</h3>
+                                </div>
+                                <div class="card-icon">
+                                    <div class="text-warning">
+                                        <span class="fas fa-users"></span>
+                                    </div>
+                                </div>
+                                <div class="progress w-100 h-5 mt-4 mb-2">
+                                    <div class="progress-bar bg-gradient-progress-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-card -->
+                }
+            }
+        </div>
+    </div>
+</div>

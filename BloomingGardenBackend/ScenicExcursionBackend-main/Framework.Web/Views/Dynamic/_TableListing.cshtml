@@ -1,0 +1,190 @@
+﻿@model Framework.Web.Models.DynamicPageModel
+<style>
+    .green {
+        color: green !important;
+    }
+
+    .red {
+        color: red !important;
+    }
+</style>
+@if (Model.ListingData != null && Model.ListingData.Count != 0)
+{
+    int columnCount = !string.IsNullOrEmpty(Model.GridColumns) ? Model.GridColumns.Split(",".ToCharArray()).Count() : 5;
+    <table id="listing_table" class="table">
+        <thead>
+            <tr>
+                @foreach (var field in Model.PageInfo.Fields.OrderBy(g => g.GridOrder).Where(x => x.AllowInGrid).Take(columnCount))
+                {
+                    if (field.IsForeignkey)
+                    {
+                        <th scope="col" class="@field.DisplayName.Replace(" ", "-").ToLower()" rel-header="@field.DisplayName.Replace(" ", "-") ">@field.DisplayName.Replace("Id", "")</th>
+                    }
+                    else
+                    {
+                        <th scope="col" class="@field.DisplayName.Replace(" ", "-").ToLower()" rel-header="@field.DisplayName.Replace(" ", "-")">@field.DisplayName</th>
+                    }
+                }
+                @if (!string.IsNullOrEmpty(Model.GridColumns))
+                {
+                    foreach (string column in Model.GridColumns.Split(",".ToCharArray()))
+                    {
+                        if (!Model.PageInfo.Fields.Exists(x => x.ColumnName == column))
+                        {
+                            <th class="@column.Replace(" ", "-").ToLower()">@column.Sentencify()</th>
+                        }
+                    }
+                }
+                @if (Model.AllowPreview)
+                {
+                    <th rel-header="Preview">Preview</th>
+                }
+                @if (Model.AllowEdit)
+                {
+                    <th>Edit</th>
+                }
+                @if (Model.AllowDelete)
+                {
+                    <th>Delete</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.ListingData)
+            {
+                if (row == null || row.Count == 0)
+                {
+                    continue;
+                }
+                var keys = Model.PageInfo.Fields.OrderBy(g => g.GridOrder).Where(x => x.AllowInGrid).Take(columnCount);
+
+                <tr relf-pkvalue="@row[Model.PageInfo.PrimaryKeyField.Name].ToString()">
+                    @foreach (var col in keys)
+                    {
+                        if (row.ContainsKey(col.Name))
+                        {
+                            if (col.IsForeignkey)
+                            {
+                                var fee = Model.PageInfo.Fields.Where(f => f.Name == col.Name).FirstOrDefault();
+                                string val = "";
+                                foreach (var drow in fee.RefrencedTableData)
+                                {
+                                    try
+                                    {
+                                        if (drow[fee.ValueColumnName].ToString() == row[col.Name].ToString())
+                                        {
+                                            val = drow[fee.TextColumnName].ToString();
+                                        }
+                                        if (fee.IsDecimal)
+                                        {
+                                            val = string.Format("{0:##0.00;(#0.00);0.00}", val);
+                                        }
+                                    }
+                                    catch (Exception ex) { }
+
+                                }
+                                <td class="colum @col.DisplayName.Replace(" ", "-").ToLower()">@val</td>
+                            }
+                            else
+                            {
+                                if (col.IsBoolean)
+                                {
+                                    string icc = (row[col.Name] == null) ? "" : bool.Parse(row[col.Name].ToString()) ? "check" : "circle";
+                                    string color = (row[col.Name] == null) ? "" : bool.Parse(row[col.Name].ToString()) ? "green" : "red";
+                                    <td><i class="fa fa-@icc @color"></i></td>
+                                }
+                                else
+                                {
+                                    if (col.IsDateTime)
+                                    {
+                                        if (row[col.Name] != null)
+                                        {
+                                            <td class="colum @col.DisplayName.Replace(" ", "-").ToLower()">@DateTime.Parse(row[col.Name].ToString()).ToShortDateString()</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (col.IsDecimal)
+                                        {
+                                            <td class="colum @col.DisplayName.Replace(" ", "-").ToLower()">@string.Format("{0:##0.00;(#0.00);0.00}", row[col.Name])</td>
+                                        }
+                                        else
+                                        {
+                                            if (col.Name.Contains("Url") && row[col.Name] != null && (row[col.Name].ToString().Contains(".jpg") || row[col.Name].ToString().Contains(".png")))
+                                            {
+                                                <td class="colum @col.DisplayName.Replace(" ", "-").ToLower()">
+                                                    <img src="@row[col.Name]" style="height:40px;height:40px;" />
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td class="colum @col.DisplayName.Replace(" ", "-").ToLower()">@row[col.Name]</td>
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>-</td>
+                        }
+                    }
+                    @if (!string.IsNullOrEmpty(Model.GridColumns))
+                    {
+                        foreach (string column in Model.GridColumns.Split(",".ToCharArray()))
+                        {
+                            if (!Model.PageInfo.Fields.Exists(x => x.ColumnName == column))
+                            {
+                                <td rel-csutomecol="@column" relf-rowid="@row[Model.PageInfo.PrimaryKeyField.Name].ToString()">@row[column]</td>
+                            }
+                        }
+                    }
+                    @if (Model.AllowPreview)
+                    {
+                        var json = (new System.Web.Script.Serialization.JavaScriptSerializer()).Serialize(row);
+                        <td><a href="javascript:void()" rel-row-data="@json" relf-preview="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" title="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]"><i class="icon publish" title=""></i></a></td>
+                    }
+
+                    @if (Model.AllowEdit)
+                    {
+                        <td class="td-actions text-left">
+                            <a relf-edit="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" title="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" class="btn btn-sm btn-circle btn-info"><span class="btn-lb"><i class="fa fa-edit" style="color:black;"></i></span></a>
+                        </td>
+                    }
+                    @if (Model.AllowDelete)
+                    {
+                        <td class="td-actions text-left">
+                            <a relf-delete="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" relf-column="@Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()" class="btn btn-sm btn-circle btn-danger">
+                                <span class="btn-lb">
+                                    <i class="fa fa-trash" style="color:black;"></i>
+                                </span>
+                            </a>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="col-sm-12">
+        <div class="alert alert-cls" role="alert">
+            No search result
+            <input type="hidden" id="totalrecords" name="totalrecords" value="0" />
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#listing_table").dataTable();
+        }, 1000);
+    });
+</script>

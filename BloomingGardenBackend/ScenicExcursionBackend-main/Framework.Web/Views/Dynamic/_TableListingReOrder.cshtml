@@ -1,0 +1,106 @@
+﻿@model Framework.Web.Models.DynamicPageModel
+@if(Model.ListingData != null && Model.ListingData.Count != 0)
+{
+    <div class="tbl-block clear projectListing">
+<ul id="listing_table" relf-sortable="yes" class="table" cellpadding="0" cellspacing="0">
+    <li class="labh ui-state-disabled">
+          <span class="colum sn" style="float:right;width:60px">&nbsp;</span>
+        @foreach (var field in Model.PageInfo.Fields.OrderBy(g => g.GridOrder).Where(x => x.AllowInGrid).Take(5))
+        {
+            if (field.IsForeignkey)
+            { 
+            <span class="colum @field.DisplayName.Replace(" ","-").Replace("(","").Replace(")","")" rel-header="@field.DisplayName.Replace(" ","-")">@field.DisplayName.Replace("Id", "")</span>
+            }
+            else
+            {
+            <span class="colum @field.DisplayName.Replace(" ","-").Replace("(","").Replace(")","")" rel-header="@field.DisplayName.Replace(" ","-")">@field.DisplayName</span>
+                }
+        }
+        @if (Model.AllowEdit)
+        {
+            <span class="colum sn" rel-header="Edit" style="float:right;width:60px">Edit</span>
+        }
+        @if (Model.AllowDelete)
+        {
+            <span class="colum sn" rel-header="Delete"  style="float:right;width:80px">Delete</span>
+        }
+          
+
+    </li>
+   
+    @foreach (var row in Model.ListingData.OrderBy(x => x[Model.PageInfo.DisplayOrderField.Name]))
+    {
+        if (row == null || row.Count == 0)
+        {
+            continue;
+        }
+        var keys = Model.PageInfo.Fields.OrderBy(g => g.GridOrder).Where(x => x.AllowInGrid).Take(5);
+        
+        <li class="row" relf-pkvalue="@row[Model.PageInfo.PrimaryKeyField.Name].ToString()">
+            <span class="colum sn" style="float:right;width:60px"><i class="icon re-order"></i></span>
+            @foreach (var col in keys)
+            {
+                
+                if (row.ContainsKey(col.Name) )
+                {
+                    if(col.IsForeignkey)
+                    {
+                        var fee = Model.PageInfo.Fields.Where(f => f.Name == col.Name).FirstOrDefault();
+                        string val = "";
+                        foreach(var drow  in fee.RefrencedTableData)
+                        {
+                            //if (!string.IsNullOrEmpty(fee.ValueColumnName) && drow.ContainsKey(fee.ValueColumnName) && row.ContainsKey(col.Name))
+                            try
+                            {
+                                if(drow[fee.ValueColumnName].ToString() == row[col.Name].ToString())
+                                {
+                                    val = drow[fee.TextColumnName].ToString();
+                                }
+                            }
+                            catch(Exception ex){}
+                                
+                        }
+                        <span class="colum @col.DisplayName.Replace(" ","-").Replace("(","").Replace(")","")">@val&nbsp;</span>
+                    }
+                    else
+                    {
+                        if(col.IsBoolean)
+                        {
+                            string icc = bool.Parse(row[col.Name].ToString())?"success": "failed";
+                            <span class="colum"><i class="icon @icc"></i></span>                            
+                        }
+                        else{
+                            <span class="colum @col.DisplayName.Replace(" ","-").Replace("(","").Replace(")","")">@row[col.Name]&nbsp;</span>
+                        }
+                    }
+                }
+                else
+                {
+                    <span class="colum @col.DisplayName.Replace(" ","-")">-</span>
+                }
+               
+                
+            }
+            @if(Model.AllowEdit)
+            {
+                <span class="colum sn" style="float:right;width:60px;"><a href="" relf-edit="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" ><i class="glyphicon glyphicon-edit green" title=""></i></a></span>
+            }
+            @if(Model.AllowDelete)
+            {
+                <span class="colum  sn" style="float:right;width:60px;"><a href="" relf-delete="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" relf-column="@Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()"><i class="glyphicon glyphicon-remove red"></i></a></span>
+            }
+                                            
+
+             <div class="clear"></div> 
+        </li>
+        
+    }
+    </ul>
+    </div>
+     <input type="hidden" id="totalrecords" name="totalrecords" value="20" />
+}
+else
+{
+     <div class="no-results">No search result</div>
+     <input type="hidden" id="totalrecords" name="totalrecords" value="0" />
+}

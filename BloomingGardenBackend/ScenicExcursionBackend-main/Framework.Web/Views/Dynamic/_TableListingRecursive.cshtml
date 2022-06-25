@@ -1,0 +1,133 @@
+﻿@model Framework.Web.Models.DynamicPageModel
+@if (Model.ListingData != null && Model.ListingData.Count != 0)
+{
+    <div class="tbl-block top-menu-nav clear projectListing">
+        <table class="table table-striped" style="background-color: #3C8DBC; color: white;">
+            <thead>
+                <tr>
+                    @foreach (var field in Model.PageInfo.Fields.OrderBy(x => x.GridOrder).Where(x => x.AllowInGrid).Take(5))
+                    {
+                        if (field.IsForeignkey)
+                        {
+                            <td class="colum @field.DisplayName.Replace(" ","-").ToLower()" rel-header="@field.DisplayName.Replace(" ","-")">@field.DisplayName.Replace("Id", "")</td>
+                        }
+                        else
+                        {
+                            <td class="colum @field.DisplayName.Replace(" ","-").ToLower()" rel-header="@field.DisplayName.Replace(" ","-")">@field.DisplayName</td>
+                        }
+                    }
+                    @*  @for (int i = Model.PageInfo.Fields.OrderBy(x => x.GridOrder).Where(x => x.AllowInGrid).Take(5).Count(); i <= 4; i++)
+                        {
+                            <span class="colum">&nbsp;</span>
+                        }*@
+                    <td class="colum">Childrens</td>
+                    @if (Model.AllowEdit)
+                    {
+                        <td class="colum edit editcol">Edit</td>
+                    }
+                    @if (Model.AllowDelete)
+                    {
+                        <td class="colum delete deletecol">Delete</td>
+                    }
+                </tr>
+            </thead>
+        </table>
+        <ul class="list-group" id="listing_table" relf-sortable="yes" class="table" cellpadding="0" cellspacing="0">
+
+            @foreach (var row in Model.ListingData.OrderBy(x => x[Model.PageInfo.DisplayOrderField.Name]).Where(x => x[Model.PageInfo.ParentField.Name] == null))
+            {
+                if (row == null || row.Count == 0)
+                {
+                    continue;
+                }
+                var keys = Model.PageInfo.Fields.OrderBy(x => x.GridOrder).Where(x => x.AllowInGrid).Take(5);
+
+                <li class="list-group-item row level1" relf-pkvalue="@row[Model.PageInfo.PrimaryKeyField.Name].ToString()">
+
+                    @foreach (var col in keys)
+                    {
+
+                        if (row.ContainsKey(col.Name))
+                        {
+                            if (col.IsForeignkey)
+                            {
+                                var fee = Model.PageInfo.Fields.Where(f => f.Name == col.Name).FirstOrDefault();
+                                string val = "";
+                                foreach (var drow in fee.RefrencedTableData)
+                                {
+                                    //if (!string.IsNullOrEmpty(fee.ValueColumnName) && drow.ContainsKey(fee.ValueColumnName) && row.ContainsKey(col.Name))
+                                    try
+                                    {
+                                        if (drow[fee.ValueColumnName].ToString() == row[col.Name].ToString())
+                                        {
+                                            val = drow[fee.TextColumnName].ToString();
+                                        }
+                                    }
+                                    catch (Exception ex) { }
+
+                                }
+                                <span class="colum @col.DisplayName.Replace(" ","-").ToLower() col-md-1">@val &nbsp;</span>
+                            }
+                            else
+                            {
+                                if (col.IsBoolean)
+                                {
+                                    string icc = bool.Parse(row[col.Name].ToString()) ? "success" : "failed";
+                                    <span class="colum @col.DisplayName.Replace(" ","-").ToLower()  col-md-1"><i class="icon @icc"></i></span>
+                                }
+                                else
+                                {
+                                    <span class="colum @col.DisplayName.Replace(" ","-").ToLower() col-md-2">@row[col.Name]&nbsp;</span>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <span class="colum col-md-1">-</span>
+                        }
+
+
+                    }
+                    @* @for (int i = Model.PageInfo.Fields.OrderBy(x => x.GridOrder).Where(x => x.AllowInGrid).Take(5).Count(); i <= 4; i++)
+                        {
+                            <span class="colum">&nbsp;</span>
+                        }*@
+                    @if (Model.ListingData.OrderBy(x => x[Model.PageInfo.DisplayOrderField.Name]).Where(x => x[Model.PageInfo.ParentField.Name] != null && x[Model.PageInfo.ParentField.Name].ToString() == row[Model.PageInfo.PrimaryKeyField.Name].ToString()).Count() != 0)
+                    {
+                        <span class="colum col-md-1">
+                            <a relf-show="@row[Model.PageInfo.PrimaryKeyField.Name].ToString()" class="btn-yellow"><span>Show</span> <i class="arrow"></i></a>
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="colum col-md-1">&nbsp;</span>
+                    }
+                    @if (Model.AllowEdit)
+                    {
+                        <span class="colum edit editcol col-md-1"><a href="" relf-edit="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]"><i class="glyphicon glyphicon-edit green" title=""></i></a></span>
+                    }
+                    @if (Model.AllowDelete && Model.ListingData.Where(x => x[Model.PageInfo.ParentField.Name] != null && x[Model.PageInfo.ParentField.Name].ToString() == row[Model.PageInfo.PrimaryKeyField.Name].ToString()).Count() == 0)
+                    {
+                        <span class="colum delete deletecol col-md-1"><a href="" relf-delete="@row[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" relf-column="@Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()"><i class="glyphicon glyphicon-remove red" title=""></i></span>
+                    }
+
+                    <span class="colum re-order movcol col-md-1"><i class="icon re-order"></i></span>
+
+                    <br class="clear" />
+                    @{Model.CurrentRow = row;
+                        Model.CurrentLevel = "Level_1";}
+                    @{Html.RenderPartial("_RecursiveRow", Model);}
+
+
+                </li>
+
+            }
+        </ul>
+    </div>
+    <input type="hidden" id="totalrecords" name="totalrecords" value="20" />
+}
+else
+{
+    <div class="no-results">No search result</div>
+    <input type="hidden" id="totalrecords" name="totalrecords" value="0" />
+}

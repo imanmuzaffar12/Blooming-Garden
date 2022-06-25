@@ -1,0 +1,123 @@
+﻿@using Framework.Web.Models;
+@model RolesRightsModel
+
+<div class="card">
+    <div class="card-header card-header-rose card-header-text">
+        <div class="card-text">
+            <h4 class="card-title">Manage Roles & Rights</h4>
+        </div>
+    </div>
+    <form id="roleRightsForm">
+        <div class="card-body">
+            <div class="row">
+                <label class="col-sm-1 col-form-label">Roles</label>
+                <div class="col-sm-4">
+                    <div class="form-group bmd-form-group">
+                        <select id="RoleID" class="form-control">
+                            <option value="0">--- Select Role ---</option>
+                            @foreach (var role in Model.Roles)
+                            {
+                                string selected = Model.RoleID.HasValue && role.RoleID == Model.RoleID.Value ? "selected=selected" : string.Empty;
+                                <option @Html.Raw(selected) value="@role.RoleID">@role.RoleName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="rolesRightsDiv">
+                    @Html.Partial("_RolesRightsPartial", Model)
+                </div>
+            </div>
+        </div>
+        <!-- /.box-body -->
+        <div class="card-footer">
+            <button id="submit" onclick="SubmitRolesRights();" type="button" class="btn btn-flat btn-primary">Submit</button>
+            <br />
+            <br />
+            <div id="successAlert" class="alert alert-success alert-dismissible" style="display:none;">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-check"></i> Alert!</h4>
+                <span id="successMessage"></span>
+            </div>
+            <div id="errorAlert" class="alert alert-danger alert-dismissible" style="display:none;">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                <span id="errorMessage"></span>
+            </div>
+        </div>
+        <!-- /.box-footer-->
+    </form>
+</div>
+
+<script type="text/javascript">
+    var RoleRight = [];
+    toastr.options = {
+        "debug": false,
+        "positionClass": "toast-bottom-right",
+        "onclick": null,
+        "fadeIn": 300,
+        "fadeOut": 1000,
+        "timeOut": 2000,
+        "extendedTimeOut": 1000
+    };
+    $(document).ready(function () {
+        $("#RoleID").change(function () {
+            var roleID = $(this).val();
+            GetRolesRights(roleID);
+        });
+    });
+    function GetRolesRights(roleID) {
+        $.ajax({ url: "/Configuration/RolesRights?roleID=" + roleID, type: "GET" }).done(function (data) {
+            $("#rolesRightsDiv").html(data);
+            CheckedAll();
+        });
+    }
+    function SubmitRolesRights() {
+        var roleID = $("#RoleID").val();
+        if (roleID != 0) {
+            $.ajax({
+                url: "/Configuration/SaveRolesRights",
+                type: "POST",
+                data: JSON.stringify({ RoleRight: RoleRight, RoleID: $("#RoleID").val() }),
+                dataType: 'json',
+                contentType: 'application/json',
+            }).done(function (data) {
+                toastr.success(data);
+            });
+        }
+        else {
+            toastr.error("Please Select Role");
+        }
+    }
+    function AddEntityRoleRight(item) {
+        var EntityID = $(item).attr("EntityID");
+        var RightID = $(item).attr("RightID");
+        var RoleID = $("#RoleID").val();
+        var checked = $(item).prop("checked");
+        var index = RoleRight.indexOf(roleRight);
+        if (checked && index == -1) {
+            RoleRight.push({
+                EntityID: EntityID,
+                RightID: RightID,
+                RoleID: RoleID
+            });
+        }
+        else {
+            var roleRight = {
+                EntityID: EntityID,
+                RightID: RightID,
+                RoleID: RoleID
+            };
+            RoleRight.splice(index, 1);
+        }
+    }
+    function CheckedAll() {
+        RoleRight = [];
+        $('.check-select-p').each(function () {
+            if ($(this).is(':checked')) {
+                AddEntityRoleRight(this);
+            }
+        });
+    }
+</script>

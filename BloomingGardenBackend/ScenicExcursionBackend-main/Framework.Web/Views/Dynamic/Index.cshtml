@@ -1,0 +1,6 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+@{Html.RenderAction("TableForm", "Dynamic", new { tableName = ViewBag.TableName, excludeAddEditColumns = "CreatedBy,CreatedOn,UpdatedBy,UpdatedOn" });}
+ 

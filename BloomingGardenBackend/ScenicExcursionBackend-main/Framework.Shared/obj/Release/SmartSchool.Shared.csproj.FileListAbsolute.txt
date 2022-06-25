@@ -1,0 +1,53 @@
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\SmartSchool.Shared.dll.config
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\SmartSchool.Shared.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\SmartSchool.Shared.pdb
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\CreativeServices.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\log4net.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\Newtonsoft.Json.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\NLog.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\ServiceStack.Common.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\ServiceStack.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\ServiceStack.Interfaces.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\ServiceStack.Redis.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\ServiceStack.Text.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.Mvc.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.Razor.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.WebPages.Razor.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.WebPages.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\Microsoft.Web.Infrastructure.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.WebPages.Deployment.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\Newtonsoft.Json.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.Mvc.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.Razor.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.WebPages.Razor.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.WebPages.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Release\System.Web.WebPages.Deployment.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\obj\Release\SmartSchool.Shared.csprojResolveAssemblyReference.cache
+F:\Bits Collision\SmartSchool\CMS.Shared\obj\Release\SmartSchool.Shared.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\obj\Release\SmartSchool.Shared.pdb
+F:\Development\smartschool\CMS.Shared\bin\Release\SmartSchool.Shared.dll.config
+F:\Development\smartschool\CMS.Shared\bin\Release\SmartSchool.Shared.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\SmartSchool.Shared.pdb
+F:\Development\smartschool\CMS.Shared\bin\Release\CreativeServices.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\log4net.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\Newtonsoft.Json.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\NLog.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\ServiceStack.Common.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\ServiceStack.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\ServiceStack.Interfaces.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\ServiceStack.Redis.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\ServiceStack.Text.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.Mvc.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.Razor.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.WebPages.Razor.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.WebPages.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.WebPages.Deployment.dll
+F:\Development\smartschool\CMS.Shared\bin\Release\Newtonsoft.Json.xml
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.Mvc.xml
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.Razor.xml
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.WebPages.Razor.xml
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.WebPages.xml
+F:\Development\smartschool\CMS.Shared\bin\Release\System.Web.WebPages.Deployment.xml
+F:\Development\smartschool\CMS.Shared\obj\Release\SmartSchool.Shared.csprojResolveAssemblyReference.cache
+F:\Development\smartschool\CMS.Shared\obj\Release\SmartSchool.Shared.dll
+F:\Development\smartschool\CMS.Shared\obj\Release\SmartSchool.Shared.pdb

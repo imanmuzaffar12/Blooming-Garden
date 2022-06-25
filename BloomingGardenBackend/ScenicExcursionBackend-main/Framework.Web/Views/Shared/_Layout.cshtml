@@ -1,0 +1,98 @@
+﻿@using Framework.Web.CommonCode.Helpers
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blooming Garden</title>
+
+    <!-- CSS -->
+    <link href="~/content//assets/css/fonts/fontawesome/all.min.css" rel="stylesheet">
+    <link href="~/content//assets/css/fonts/beid.css" rel="stylesheet">
+
+    <link href="~/content//assets/css/main.css" rel="stylesheet">
+    <link href="~/content//assets/css/styles.css" rel="stylesheet">
+
+    <!-- JQVMAP -->
+    <link href="~/content//assets/plugins/jqvmap/jqvmap.min.css" rel="stylesheet">
+
+    <!-- dateRangePicker -->
+    <link href="~/content//assets/plugins/daterangepicker/daterangepicker.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="~/content//../content/assets/img/apple-touch-icon.png">
+    <link rel="icon" href="~/content/../content/assets/img/favicon.png">
+
+    <!-- Fonts -->
+    <link href="~/content//assets/fonts/inter/inter.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="~/content/assets/js/jquery.min.js"></script>
+    <script src="~/Scripts/jquery.dataTables.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <link href="~/Content/assets/plugins/dataTables/jquery.dataTables.css" rel="stylesheet" />
+    <script src="~/Content/assets/js/sweetalert2.js"></script>
+
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body class="body">
+    @{
+        string displayName = Authentication.Instance.User == null ? "" : Authentication.Instance.User.FullName;
+        string pictureURL = Authentication.Instance.User == null ? "" : Framework.Web.CommonCode.Helpers.Authentication.Instance.User.ProfileUrl;
+    }
+    @{ Html.RenderPartial("_MainHeader"); }
+    <main>
+        @{ Html.RenderAction("SideBar", "Home"); }
+        <!-- main content -->
+        <div class="main-container">
+            @RenderBody()
+            @{ Html.RenderPartial("_Footer"); }
+        </div>
+    </main>
+    <!-- preloader -->
+    <div class="preloaderWrapper"></div>
+
+    <!-- Bootstrap -->
+    <script src="~/content/assets/js/bootstrap.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="~/content/assets/plugins/chart/Chart.min.js" id="_chartJS_min"></script>
+    <script src="~/content/assets/plugins/chart/Chart.bundle.min.js"></script>
+    <script src="~/content/assets/plugins/chart/chartjs-plugin-annotation.js"></script>
+    <script src="~/content/assets/plugins/chart/chartjs-plugin-labels.js"></script>
+
+    <!-- apexcharts -->
+    <script src="~/content/assets/plugins/apexcharts/apexcharts.min.js"></script>
+
+    <!-- RangeSlider -->
+    <script src="~/content/assets/plugins/rangeslider/rangeslider.min.js" id="_rangeJS_min"></script>
+
+    <!-- Moment -->
+    <script src="~/content/assets/plugins/lib/moment/moment.min.js"></script>
+
+    <!-- JQVMAP -->
+    <script src="~/content/assets/plugins/jqvmap/jquery.vmap.min.js" id="_JQVMAP"></script>
+    <script src="~/content/assets/plugins/jqvmap/maps/jquery.vmap.world.js"></script>
+
+    <!-- dateRangePicker -->
+    <script src="~/content/assets/plugins/daterangepicker/daterangepicker.js" id="_DateRangeJS_min"></script>
+
+    <!-- User JS -->
+    <script src="~/content/assets/js/scripts.js"></script>
+
+    <!-- Main JS -->
+    <script src="~/content/assets/js/main.js" id="_mainJS" data-plugins="load"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <!-- Modules -->
+    <script src="~/Scripts/CPSiteJavaScript.js"></script>
+    <script src="~/content/assets/js/modules.js"></script>
+</body>
+</html>

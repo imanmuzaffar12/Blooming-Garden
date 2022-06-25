@@ -1,0 +1,838 @@
+﻿@using Framework.Shared.DataServices.CustomEntities
+@using Framework.Web.CommonCode.Helpers
+@model Framework.Web.Models.DynamicPageModel
+<style>
+    .error {
+        color: red;
+    }
+</style>
+<form class="form-horizontal" id="detailForm" enctype="multipart/form-data">
+    <div class="card border">
+        <div class="accordion">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <a>@Model.PageInfo.TableName.Sentencify()</a>
+                    </h5>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="projectdetail" class="fc-center">
+                <div id="hiddenarea">
+                    <input type="hidden" id="TableName" name="TableName" value="@Model.PageInfo.TableName" />
+                    <input type="hidden" id="IsNew" name="IsNew" value="true" />
+                    <input type="hidden" id="AllowApprovals" name="AllowApprovals" value="@Model.AllowApprovals.Value.ToString().ToLower()" />
+                    <input type="hidden" id="ExtenderName" name="ExtenderName" value="@Model.ExtenderName" />
+                </div>
+                @{
+                    if (Model.PageInfo.Fields.Where(x => (x.IsGroup.HasValue && x.IsGroup.Value)).Count() == 0)
+                    {
+                        Model.PageInfo.Fields.Add(new DynamicField() { IsGroup = true });
+                    }
+                }
+                @foreach (var group in Model.PageInfo.Fields.Where(x => (x.IsGroup.HasValue && x.IsGroup.Value)).OrderBy(x => x.DisplaySeqNo).ToList())
+                {
+                    if (!(group.IsFileUpload.HasValue && group.IsFileUpload.Value))
+                    {
+                        <div class="clear"></div>
+                        <div id="@group.ColumnName">
+                            @if (group.ShowGroupTitle)
+                            {
+                                <div class="sub-title">
+                                    <h2><span>@group.DisplayName</span></h2>
+                                </div>
+                            }
+                            @foreach (var field in Model.PageInfo.Fields.Where(x => (x.ParentSubGroupID == group.EntityDetailsID || group.EntityDetailsID == 0)).OrderBy(x => x.DisplaySeqNo).ToList())
+                            {
+                                if (field.IsGroup.HasValue && field.IsGroup.Value || field.ParentEntityDetailsID.HasValue)
+                                {
+                                    continue;
+                                }
+                                string display = "";
+                                var ec = Model.ExcludeAddEditColumns.Split(",".ToCharArray());
+                                if (ec.Contains(field.Name))
+                                {
+                                    display = "display:none;";
+                                }
+                                if (!field.Disaplayble)
+                                {
+                                    <input type="hidden" id="@field.Name" name="@field.Name" value="@Model.ObjectValues[field.Name]" />
+                                    continue;
+                                }
+                                if (field.IsAutoID)
+                                {
+                                    <input type="hidden" id="@field.Name" name="@field.Name" value="@Model.ObjectValues[field.Name]" />
+                                    continue;
+                                }
+                                if (!field.ParentEntityDetailsID.HasValue && Model.PageInfo.Fields.Where(x => x.ParentEntityDetailsID == field.EntityDetailsID).Count() == 0)
+                                {
+                                    <div class="form-group">
+                                        <div class="row" rel-row="@field.Name" style="@display">
+                                            <div class="col-sm-4">
+                                                <label>@field.DisplayName</label>
+                                            </div>
+                                            @if (field.IsForeignkey && !field.EnableAutoComplate)
+                                            {
+
+                                                if (field.RefrencedTableData != null)
+                                                {
+                                                    List<SelectListItem> items = new List<SelectListItem>();
+                                                    foreach (var dlOp in field.RefrencedTableData)
+                                                    {
+
+                                                        SelectListItem item = new SelectListItem();
+                                                        if (Model.ObjectValues[field.Name] != null && dlOp[field.ValueColumnName].ToString() == Model.ObjectValues[field.Name].ToString())
+                                                        {
+                                                            item.Selected = true;
+
+                                                        }
+                                                        if (dlOp[field.TextColumnName] == null)
+                                                        {
+                                                            continue;
+                                                        }
+                                                        item.Text = dlOp[field.TextColumnName].ToString();
+                                                        item.Value = dlOp[field.ValueColumnName].ToString();
+                                                        items.Add(item);
+                                                    }
+                                                    items = items.OrderBy(x => x.Text).ToList();
+                                                    <div class="col-sm-4">
+                                                        @Html.DropDownList(field.Name, items, "--- Please Select ---", new { relfselected = Model.ObjectValues[field.Name], @class = "form-control" })
+                                                    </div>
+                                                }
+                                            }
+                                            else if (field.IsBoolean)
+                                            {
+                                                <div class="col-sm-4 custom-control custom-checkbox mb-5" style="left:13px;">
+                                                    <input class="custom-control-input" class="checkbox" type="checkbox" id="cbx_@field.Name" name="cbx_@field.Name" relf="@field.Name" checked="@Model.ObjectValues[field.Name]" data-value="@Model.ObjectValues[field.Name]">
+                                                    <input class="custom-control-label" type="hidden" id="@field.Name" name="@field.Name" data-value="@Model.ObjectValues[field.Name]">
+                                                    <label class="custom-control-label" for="cbx_@field.Name"></label>
+                                                </div>
+
+                                            }
+                                            else if (field.IsFileUpload.HasValue && field.IsFileUpload.Value)
+                                            {
+                                                bool imageExist = Model.ObjectValues[field.Name] != null && !string.IsNullOrEmpty(Model.ObjectValues[field.Name].ToString());
+                                                <div class="col-sm-8" rel-row="@field.Name" style="@display">
+                                                    <span class="btn btn-rose btn-round btn-file">
+                                                        <input type="hidden" id="@field.Name" name="@field.Name" data-value="@Model.ObjectValues[field.Name]" value="@Model.ObjectValues[field.Name]">
+                                                        <input id="uploadFile" fieldName="@field.Name" relf-holder="ImageHolder_@field.Name" onchange="uploadImage(this)" type="file" name="" style="margin-left: -27px;">
+                                                    </span>
+                                                    <div id="imgholders" style="margin-top:10px;">
+                                                        <img rel-holderimage="/content/assets/img/image_placeholder.jpg" id="ImageHolder_@field.Name" src="@(imageExist ? Model.ObjectValues[field.Name].ToString() : "/content/assets/img/image_placeholder.jpg")" style="width:100px;height:100px;" />
+                                                        <div id="remove" relf-holder="ImageHolder_@field.Name" onclick="removeImage(this);" fieldName="@field.Name" style="position: absolute;top: 50px;left: 98px;color: red;">
+                                                            <i class="fas fa-trash"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                field.MaxLength = (field.IsInt16 || field.IsInt32 || field.IsInt64) ? (short)6 : field.MaxLength;
+                                                string readOnly = (field.IsPrimaryKey && !Model.IsNew) ? "readonly='readonly'" : "";
+                                                if (field.MaxLength == -1 || field.MaxLength > 512)
+                                                {
+                                                    int maxLen = field.MaxLength == -1 ? 4096 : field.MaxLength;
+                                                    maxLen = maxLen - 1;
+                                                    string height = field.MaxLength == -1 ? "70px" : "70px";
+                                                    <div class="col-sm-4">
+                                                        <textarea class="form-control" id="@field.Name" @readOnly name="@field.Name" maxlength="@maxLen" style="height:@height; width:450px;" dbvalue="@Model.ObjectValues[field.Name]">@Model.ObjectValues[field.Name]</textarea>
+                                                    </div>
+                                                    <div class="clear"></div>
+                                                }
+                                                else
+                                                {
+                                                    string autoComplete = field.EnableAutoComplate ? string.Format("relf-autocomplete={0}", field.AutoCompleteSourceQuery) : "";
+                                                    if (field.IsDateTime)
+                                                    {
+                                                        string strVal = (Model.ObjectValues[field.Name] != null) ? Model.ObjectValues[field.Name].ToString() : null;
+                                                        if (!string.IsNullOrEmpty(strVal) && (field.ColumnName == "DateOfBirth" || field.ColumnName == "TourDate"))
+                                                        {
+                                                            strVal = DateTime.Parse(strVal).ToString("yyyy-MM-dd");
+                                                        }
+                                                        else if(!string.IsNullOrEmpty(strVal) && field.ColumnName != "DateOfBirth")
+                                                        {
+                                                            strVal = DateTime.Parse(strVal).ToString("yyyy-MM-dd hh:mm");
+                                                        }
+
+                                                        string fieldType = field.ColumnName == "DateOfBirth" ? "date" : "date";
+                                                        <div class="col-sm-4">
+                                                            <input class="form-control form-rounded" type="@fieldType" id="@field.Name" @readOnly @autoComplete name="@field.Name" value="@strVal" maxlength="@(field.MaxLength + 10)" dbvalue="@Model.ObjectValues[field.Name]" />
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (field.EnableAutoComplate)
+                                                        {
+                                                            <input type="hidden" id="@field.Name" @readOnly name="@field.Name" value="@Model.ObjectValues[field.Name]" maxlength="@(field.MaxLength - 1)" dbvalue="@Model.ObjectValues[field.Name]" />
+                                                            <input class="form-control form-rounded" type="text" id="ACF_@field.Name" sourcefield="@field.Name" @readOnly @autoComplete name="ACF_@field.Name" tal:attributes="name options/fieldname; value options/fieldvalue;" value="@Model.ObjectValues[field.Name]" dbvalue="@Model.ObjectValues[field.Name]" />
+                                                        }
+                                                        else
+                                                        {
+                                                            var value = Model.ObjectValues[field.Name];
+                                                            if (field.IsDecimal && value != null)
+                                                            {
+                                                                if (!string.IsNullOrEmpty(value.ToString()))
+                                                                {
+                                                                    value = string.Format("{0:##0.00;-#0.00;0.00}", value);
+                                                                }
+                                                            }
+                                                            <div class="col-sm-4">
+                                                                <input type="text" placeholder="@field.Name" class="form-control form-rounded" id="@field.Name" @readOnly @autoComplete name="@field.Name" value="@value" maxlength="@(field.MaxLength - 1)" dbvalue="@Model.ObjectValues[field.Name]" />
+                                                            </div>
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="form-group">
+                                        <div class="row" rel-row="@field.Name" style="@display">
+                                            <label>@field.DisplayName</label>
+
+                                            <div class="pull-left btnpad">
+                                                @if (field.IsForeignkey)
+                                                {
+
+                                                    if (field.RefrencedTableData != null)
+                                                    {
+                                                        List<SelectListItem> items = new List<SelectListItem>();
+                                                        foreach (var dlOp in field.RefrencedTableData)
+                                                        {
+
+                                                            SelectListItem item = new SelectListItem();
+                                                            if (Model.ObjectValues[field.Name] != null && dlOp[field.ValueColumnName].ToString() == Model.ObjectValues[field.Name].ToString())
+                                                            {
+                                                                item.Selected = true;
+
+                                                            }
+                                                            if (dlOp[field.TextColumnName] == null)
+                                                            {
+                                                                continue;
+                                                            }
+                                                            item.Text = dlOp[field.TextColumnName].ToString();
+                                                            item.Value = dlOp[field.ValueColumnName].ToString();
+
+                                                            items.Add(item);
+                                                        }
+                                                        items = items.OrderBy(x => x.Text).ToList();
+                                                        <div class="col-sm-4">
+                                                            @Html.DropDownList(field.Name, items, "--- Please Select ---", new { relfselected = Model.ObjectValues[field.Name], @class = "form-control" })
+                                                        </div>
+
+                                                    }
+                                                }
+                                                else if (field.IsBoolean)
+                                                {
+                                                    <input type="checkbox" id="cbx_@field.Name" name="cbx_@field.Name" relf="@field.Name" checked="@Model.ObjectValues[field.Name]" data-value="@Model.ObjectValues[field.Name]">
+                                                    <input type="hidden" id="@field.Name" name="@field.Name" data-value="@Model.ObjectValues[field.Name]">
+                                                }
+                                                else
+                                                {
+                                                    field.MaxLength = (field.IsInt16 || field.IsInt32 || field.IsInt64) ? (short)6 : field.MaxLength;
+                                                    string readOnly = (field.IsPrimaryKey && !Model.IsNew) ? "readonly='readonly'" : "";
+                                                    field.MaxLength = field.MaxLength == 0 ? (short)-1 : field.MaxLength;
+                                                    field.MaxLength = (short)(field.MaxLength - 1);
+                                                    if (field.MaxLength == 0 || field.MaxLength > 512)
+                                                    {
+                                                        string height = field.MaxLength == 0 ? "70px" : "30px";
+                                                        <textarea id="@field.Name" @readOnly name="@field.Name" maxlength="@field.MaxLength" style="height:@height; width:450px;" dbvalue="@Model.ObjectValues[field.Name]">@Model.ObjectValues[field.Name]</textarea>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (field.IsDateTime)
+                                                        {
+                                                            <input type="date" id="@field.Name" @readOnly name="@field.Name" value="@Model.ObjectValues[field.Name]" maxlength="@field.MaxLength" dbvalue="@Model.ObjectValues[field.Name]" class="form-control form-rounded" />
+                                                        }
+                                                        else
+                                                        {
+                                                            var value = Model.ObjectValues[field.Name];
+                                                            if (field.IsDecimal && value != null)
+                                                            {
+                                                                if (!string.IsNullOrEmpty(value.ToString()))
+                                                                {
+                                                                    value = string.Format("{0:##0.00;-#0.00;0.00}", value);
+                                                                }
+                                                            }
+                                                            <input type="text" class="form-control form-rounded" id="@field.Name" placeholder="@field.DisplayNameAr" @readOnly name="@field.Name" value="@value" maxlength="@field.MaxLength" dbvalue="@Model.ObjectValues[field.Name]" />
+                                                        }
+                                                    }
+                                                }
+                                            </div>
+                                            @foreach (var joinField in Model.PageInfo.Fields.Where(x => x.ParentEntityDetailsID == field.EntityDetailsID).ToList())
+                                            {
+                                                <div class="pull-left btnpad">
+                                                    @if (joinField.IsForeignkey)
+                                                    {
+
+                                                        if (joinField.RefrencedTableData != null)
+                                                        {
+                                                            List<SelectListItem> items = new List<SelectListItem>();
+                                                            foreach (var dlOp in joinField.RefrencedTableData)
+                                                            {
+
+                                                                SelectListItem item = new SelectListItem();
+                                                                if (Model.ObjectValues[joinField.Name] != null && dlOp[joinField.ValueColumnName].ToString() == Model.ObjectValues[joinField.Name].ToString())
+                                                                {
+                                                                    item.Selected = true;
+
+                                                                }
+                                                                if (dlOp[joinField.TextColumnName] == null)
+                                                                {
+                                                                    continue;
+                                                                }
+                                                                item.Text = dlOp[joinField.TextColumnName].ToString();
+                                                                item.Value = dlOp[joinField.ValueColumnName].ToString();
+                                                                items.Add(item);
+                                                            }
+                                                            items = items.OrderBy(x => x.Text).ToList();
+                                                            <div class="slhold">
+                                                                @Html.DropDownList(joinField.Name, items, "--- Please Select ---", new { relfselected = Model.ObjectValues[joinField.Name], @class = "form-control" })
+                                                            </div>
+                                                        }
+                                                    }
+                                                    else if (joinField.IsBoolean)
+                                                    {
+                                                        <input type="checkbox" id="cbx_@joinField.Name" name="cbx_@joinField.Name" relf="@joinField.Name" checked="@Model.ObjectValues[joinField.Name]" data-value="@Model.ObjectValues[joinField.Name]">
+                                                        <input type="hidden" id="@joinField.Name" name="@joinField.Name" data-value="@Model.ObjectValues[joinField.Name]">
+
+                                                    }
+                                                    else
+                                                    {
+                                                        field.MaxLength = (joinField.IsInt16 || joinField.IsInt32 || joinField.IsInt64) ? (short)6 : joinField.MaxLength;
+                                                        string readOnly = (joinField.IsPrimaryKey && !Model.IsNew) ? "readonly='readonly'" : "";
+                                                        if (joinField.MaxLength == 0 || joinField.MaxLength > 512)
+                                                        {
+                                                            string height = joinField.MaxLength == 0 ? "70px" : "30px";
+                                                            <textarea id="@joinField.Name" @readOnly name="@joinField.Name" style="height:@height; width:450px;" dbvalue="@Model.ObjectValues[joinField.Name]">@Model.ObjectValues[joinField.Name]</textarea>
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="text" class="form-control form-rounded" id="@joinField.Name" @readOnly placeholder="@joinField.DisplayNameEn" name="@joinField.Name" value="@Model.ObjectValues[joinField.Name]" maxlength="@joinField.MaxLength" dbvalue="@Model.ObjectValues[joinField.Name]">
+                                                        }
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        string creativeIDfld = "";
+                        string creativeURLfld = "";
+                        string creativeURL = "";
+                        foreach (var field in Model.PageInfo.Fields.Where(x => (x.ParentSubGroupID == group.EntityDetailsID || group.EntityDetailsID == 0)).OrderBy(x => x.DisplaySeqNo).ToList())
+                        {
+                            if (field.Name.ToLower().Contains("id"))
+                            {
+                                creativeIDfld = field.Name;
+                            }
+                            if (field.Name.ToLower().Contains("url") && field.IsFileUpload.HasValue && field.IsFileUpload.Value)
+                            {
+                                creativeURLfld = field.Name;
+                                if (Model.ObjectValues[field.Name] != null)
+                                {
+                                    creativeURL = Model.ObjectValues[field.Name].ToString();
+                                }
+                            }
+                            <input type="hidden" id="@field.Name" name="@field.Name" value="@Model.ObjectValues[field.Name]" />
+                        }
+                        string displayPreview = string.IsNullOrEmpty(creativeURL) ? "display:none;" : "";
+                        string displayUpload = string.IsNullOrEmpty(creativeURL) ? "" : "display:none;";
+                        <div class="ih overflow-fix clear" rel-row="@group.Name">
+                            <label>@group.DisplayName</label>
+                            <div id="FileUpload_@group.EntityDetailsID" style="@displayUpload">
+                                <iframe id="iframeul_@group.EntityDetailsID" src="/dynamic/uploadfile?id=@group.EntityDetailsID" style="border: none; height: 32px; width: 550px; float: left;"></iframe>
+                                <span id="uploading_@group.EntityDetailsID" relf-creative-id-field="@creativeIDfld" relf-creative-url-field="@creativeURLfld" class="loading" style="display: none;">
+                                    <img src="/content/images/loader-01.gif" />
+                                </span>
+                            </div>
+                            <div class="projectAttachments" id="FilePreview_@group.EntityDetailsID" style="@displayPreview">
+                                <div class="pull-left">
+                                    <a id="fileID_@group.EntityDetailsID" href="@creativeURL" target="_blank">@creativeURL</a>
+                                    <input class="btn-lgray remove" type="button" optid="@group.EntityDetailsID" relf-button="remove_preivew" value="Remove">
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                }
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div style="text-align:center;">
+                            <input type="reset" id="btnCancel" class="btn btn-default" style="border: 0" value="Cancel">
+                            <input type="button" id="btnAction" class="btn btn-rose" value="Save" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    function uploadImage(element) {
+        var fd = new FormData();
+        var files = $(element)[0].files[0];
+        var holder = "#" + $(element).attr("relf-holder");
+        fd.append('file', files);
+        $.ajax({
+            url: "/Dynamic/UploadFiles",
+            type: 'post',
+            data: fd,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response != 0) {
+                    $(holder).attr("src", response.Path);
+                    $('#' + $(element).attr('fieldName')).val(response.Path);
+                } else {
+                    toastr.error('File is not uploaded, please try again!');
+                }
+            },
+        });
+    }
+    function removeImage(element) {
+        var holder = "#" + $(element).attr("relf-holder");
+        $(holder).attr("src", $(holder).attr('rel-holderimage'));
+        $('#' + $(element).attr('fieldName')).val('');
+    }
+</script>
+@if (Request.QueryString["IsEditable"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            $("#btnCancel").click(function () {
+                $(".close").click();
+            });
+            $("#btnAction").click(function () {
+                saveUpdateTableRecord();
+                if (id === 0) {
+                    $("#IsNew").val("true");
+                    $("#btnAction").val("Save");
+                }
+                else {
+                    $("#IsNew").val("false");
+                    $("#btnAction").val("Update");
+                }
+                validatDetailFormForm();
+                $("#ClosePopUp").click();
+                return false;
+            });
+            $("#IsNew").val("false");
+        });
+        function beforeSearch(){};
+        function allowAddEditFormSlideUp(){
+            return true;
+        };
+        $(document).ready(function () {
+            $("[relf-edit]").each(function () {
+                $(this).click(function () {
+                    var id = $(this).attr("relf-edit");
+                    addEditForm('@Model.PageInfo.TableName', id);
+                    $("#IsNew").val("false");
+                    return false;
+                });
+            });
+            $("[relf-delete]").each(function () {
+                $(this).unbind("click");
+                $(this).click(function () {
+                    if(confirm("Do you want to delete this record?")){
+                        var id = $(this).attr("relf-delete");
+                        var col = $(this).attr("relf-column");
+                        deleteRecord('@Model.PageInfo.TableName', id, col,$("#ExtenderName").val());
+                    }
+                    return false;
+                });
+            });
+            $("[relf-sortable]").each(function () {
+
+                $("#"+$(this).attr("id")).sortable({
+                    items: "li:not(.ui-state-disabled)"
+                });
+                $("#" + $(this).attr("id")).disableSelection();
+                //console.log($(this).attr("id"));
+            });
+
+        });
+        function deleteRecord(tableName, id, colName,extndname){
+            var jqxhr = $.ajax({
+                type: "get",
+                url: "/Dynamic/DeleteRecord?tableName="+tableName +"&id="+id + "&fieldName="+colName+"&extenderName="+extndname
+            })
+            .done(function (data) {
+                //console.log(data);
+                if(data.Success == true){
+                    var row = $("[relf-delete='"+ id +"']").parent().parent();
+                    row.css("background-color", "Red");
+                    // showMessage(data.Message, false);
+                    row.fadeOut(800, function () {
+                        //Remove GridView row
+                        row.slideUp(400);
+                        //console.log($("#listing_table").find("tr:visible").length);
+                        if($("#listing_table").find("tr:visible ").length == 1){
+                            $("#listing_table").slideUp(400);
+                            if($("#listing .no-results").length == 0){
+                                $("#listings").append("<div class='no-results'>No search result</div>");
+                            }
+
+                        }
+                        pageLoaded();
+                    });
+                }
+                else{
+                    //console.log(data.ActualErrorMessage);
+                    ShowSuccessMessage(data.Message, true);
+                }
+            })
+            .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                ShowErrorMessage(errorThrown, true);
+            })
+           .always(function () { });
+        };
+
+        function formLoaded(){};
+        function pageLoaded(){};
+        function beforeSave(){};
+        function checkIsForValidToPost(){
+            return true;
+        };
+        function validateCustomeControls(){};
+        function saveUpdateTableRecord() {
+            //debugger;
+            $("input:checkbox").each(function () {
+                var relf = $(this).attr("relf");
+                $("#"+ relf).val($(this).prop("checked"));
+            });
+            validatDetailFormForm();
+            validateCustomeControls();
+
+            if(!$("#detailForm").valid()){
+                checkIsForValidToPost();
+                return false;
+            }
+
+            beforeSave();
+
+            if(!checkIsForValidToPost()){
+                return false;
+            }
+
+            var jqxhr = $.ajax({
+                type: "POST",
+                data: $("#detailForm").serialize(),
+                url: "/Dynamic/SaveUpdateTableRecord"
+            })
+               .done(function (data) {
+                   //console.log(data);
+                   if (data.Success == true) {
+                       if('@Model.ShowAddNewButton.ToString().ToLower()' == 'true'){
+                           //console.log("Sliding up....");
+                           //debugger;
+                           $("#addEditForm").slideUp(400);
+                           $("#btnNew").slideDown(500);
+                       }
+                       else{
+                           $("#btnNew").click();
+                       }
+                       toastr.success(data.Message);
+                       //ShowMessage(data.Message);
+                   }
+                   else
+                   {
+                       toastr.error(data.Message);
+                       //ShowMessage(data.Message);
+                   }
+               })
+               .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                   toastr.error(errorThrown);
+                   //ShowErrorMessage(errorThrown);
+               })
+               .always(function () { return false; });
+        };
+        function refreshPager() {
+            $("#pager").paginate({
+                count: $("#totalrecords").val() / 20,//20 is pageSize
+                start: 1,
+                display: 10,
+                border: false,
+                text_color: '#79B5E3',
+                background_color: 'none',
+                text_hover_color: '#2573AF',
+                background_hover_color: 'none',
+                images: false,
+                mouse: 'press',
+                onChange: function (page) {
+                    loadPage(page, function () { });
+                }
+            });
+        };
+        function hashUrl(hash) {
+            var currentURL = window.location;
+            currentURL.hash = hash;
+            window.location = currentURL;
+        };
+        function loadPage(page, callback) {
+            //console.log("Loading form funct");
+            $("#PageNo").val(page);
+            if (Math.floor(page) == page && $.isNumeric(page)) {
+                hashUrl("page_" + page);
+            } else {
+                hashUrl("page_");
+            }
+            var jqxhr = $.ajax({
+                type: "POST",
+                data: $("#searchform").serialize(),
+                url: "/Dynamic/TableListing"
+            })
+            .done(function (data) {
+                //console.log("Loaded data");
+                $("#listings").html(data);
+                pageLoaded();
+                $("[relf-show]").each(function(){
+                    $(this).click(function(){
+                        var at = $(this).attr("relf-show");
+                        $("#pk_"+ at).slideToggle(500);
+                        $(this).toggleClass("btn-gray");
+                        if($(this).find("span").html() == "Show"){
+                            $(this).find("span").html("Hide")
+                        }
+                        else{
+                            $(this).find("span").html("Show")
+                        }
+                    });
+                });
+                $("[relf-edit]").each(function () {
+                    $(this).click(function () {
+                        var id = $(this).attr("relf-edit");
+                        addEditForm('@Model.PageInfo.TableName', id);
+                        $("#IsNew").val("false");
+                        return false;
+                    });
+                });
+                $("[relf-sortable]").each(function () {
+                    $("#"+$(this).attr("id")).sortable({
+                        items: "li:not(.ui-state-disabled)"
+                    });
+                    $("#" + $(this).attr("id")).disableSelection();
+                    //console.log($(this).attr("id"));
+                });
+                $("[relf-delete]").each(function () {
+                    $(this).click(function () {
+                        if(confirm("Do you want to delete this record?")){
+                            var id = $(this).attr("relf-delete");
+                            var col = $(this).attr("relf-column");
+                            deleteRecord('@Model.PageInfo.TableName', id, col,$("#ExtenderName").val());
+                        }
+                        return false;
+                    });
+                });
+                callback();
+
+            })
+            .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                ShowErrorMessage(errorThrown);
+            })
+            .always(function () { });
+        }
+        function numericOnly(ctlId){
+            $('#'+ctlId).attr("maxlength","12");
+            $('#'+ctlId).on('keydown keypress keyup paste input', function () {
+                while (($(this).val().split(".").length - 1) > 1) {
+
+                    $(this).val($(this).val().slice(0, -1));
+
+                    if (($(this).val().split(".").length - 1) > 1) {
+                        continue;
+                    } else {
+                        return false;
+                    }
+
+                }
+                $(this).val($(this).val().replace(/[^0-9.-]/g, ''));
+                var int_num_allow = 10;
+                var float_num_allow = 4;
+
+                var iof = $(this).val().indexOf(".");
+
+                if (iof != -1) {
+                    if ($(this).val().substring(0, iof).length > int_num_allow) {
+                        $(this).val('');
+                        // you can remove the placeholder modification if you like
+                        $(this).attr('placeholder', 'invalid number');
+                    }
+
+                    $(this).val($(this).val().substring(0, iof + float_num_allow + 1));
+
+                } else {
+
+                    $(this).val($(this).val().substring(0, int_num_allow));
+
+                }
+
+                return true;
+
+            });
+        };
+        function numericOnlyIntegar(ctlId){
+            $('#'+ctlId).attr("maxlength","12");
+            $('#'+ctlId).on('keydown keypress keyup paste input', function () {
+                while (($(this).val().split(".").length - 1) > 1) {
+
+                    $(this).val($(this).val().slice(0, -1));
+
+                    if (($(this).val().split(".").length - 1) > 1) {
+                        continue;
+                    } else {
+                        return false;
+                    }
+
+                }
+                $(this).val($(this).val().replace(/[^0-9]/g, ''));
+                var int_num_allow = 10;
+                var float_num_allow = 4;
+
+                var iof = $(this).val().indexOf(".");
+
+                if (iof != -1) {
+                    if ($(this).val().substring(0, iof).length > int_num_allow) {
+                        $(this).val('');
+                        // you can remove the placeholder modification if you like
+                        $(this).attr('placeholder', 'invalid number');
+                    }
+
+                    $(this).val($(this).val().substring(0, iof + float_num_allow + 1));
+
+                } else {
+
+                    $(this).val($(this).val().substring(0, int_num_allow));
+
+                }
+
+                return true;
+
+            });
+        };
+    </script>
+    <script>
+                            $(document).ready(function(){
+                                if($("[relf-sortable]").length == 0){
+                                    $("#btnUpdateOrder").hide();
+                                    $("#btnResetOrder").hide();
+                                }else{
+                                    $("#btnUpdateOrder").show();
+                                    $("#btnResetOrder").show();
+                                }
+                                $("#btnUpdateOrder").click(function(){
+                                    var pks = [];
+                                    $("[relf-pkvalue]:visible").each(function(){
+                                        var pk = $(this).attr("relf-pkvalue");
+                                        pks.push(pk);
+                                    });
+                                    var jqxhr = $.ajax({
+                                        type: "POST",
+                                        data: {TableName:"@Model.TableName", OrderedPKs: pks.join(",")},
+                                        url: "/Dynamic/UpdateDisplayOrders"
+                                    })
+                                   .done(function (data) {
+                                       loadPage(1,function(){
+                                           //showMessages("Display information is updated successfully.", false, "message2", 5000);
+                                       });
+
+                                   });
+                                });
+                                $("#btnResetOrder").click(function(){
+
+                                    var jqxhr = $.ajax({
+                                        type: "POST",
+                                        data: {TableName:"@Model.TableName"},
+                                        url: "/Dynamic/ResetDisplayOrders"
+                                    })
+                                   .done(function (data) {
+                                       loadPage(1,function(){
+                                           //showMessages("Display information is reset successfully.", false, "message2", 5000);
+                                       });
+
+                                   });
+                                });
+                                $(".close").click(function(){
+                                    $("#btnNew").slideDown(500);
+                                });
+                            });
+
+    </script>
+    <script>
+                            function applyNumeric(){
+                                @foreach (var field in Model.PageInfo.Fields.Where(x => !(x.IsGroup.HasValue && x.IsGroup.Value) && (x.IsDecimal || x.IsInt16 || x.IsInt32 || x.IsInt64)).ToList())
+                {
+                    if (field.IsDecimal)
+                    {
+             @:numericOnly('@field.ColumnName');
+                                                                                                                                                                                                                                                                                                                                                 }
+                    else
+                    {
+             @:numericOnlyIntegar('@field.ColumnName');
+
+                    }
+                }
+                            }
+                            function validatDetailFormForm() {
+                                $("#detailForm").validate({
+                                    rules: {
+                                        @foreach (var field in Model.PageInfo.Fields.Where(x => !(x.IsGroup.HasValue && x.IsGroup.Value)).ToList())
+                        {
+                            field.MaxLength = (field.IsInt16 || field.IsInt32 || field.IsInt64) ? (short)6 : field.MaxLength;
+                            field.MaxLength = field.IsDateTime ? (short)15 : field.MaxLength;
+                            if (field.IsRequired && !field.IsBoolean)
+                            {
+                            @:@field.Name:{required:true, maxlength:@(field.MaxLength - 1)},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                        }
+                                    },
+                                    messages: {
+                                        @foreach (var field in Model.PageInfo.Fields.Where(x => !(x.IsGroup.HasValue && x.IsGroup.Value)).ToList())
+                        {
+                            if (field.IsRequired && !field.IsBoolean)
+                            {
+                                @:@field.Name:{required:'@field.DisplayName is required.', maxlength:'@field.DisplayName max length is @(field.MaxLength - 1) characters.'},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                        }
+                                    },
+                                    errorElement: "div",
+                                    focusInvalid: true
+
+                                });
+                                jQuery.validator.addMethod('selectcheck', function (value) {
+                                    return (value != '0');
+                                });
+                            };
+
+    </script>
+    <script>
+        window.uploadDone = function (id, creativeid, creativeurl, errorMessage, thumbnailCreativeID, thumbnailURL) {
+            $("#uploading_" + id).hide();
+            if (creativeurl.length != 0) {
+                var groupID = "#uploading_" + id;
+                $("#" + $(groupID).attr("relf-creative-id-field")).val(creativeid);
+                $("#" + $(groupID).attr("relf-creative-url-field")).val(creativeurl);
+                $("#fileID_" + id).attr("href", creativeurl);
+                $("#fileID_" + id).html(creativeurl);
+                $("#FileUpload_" + id).hide();
+                $("#FilePreview_" + id).show();
+            }
+        };
+        window.uploadingStarted = function (id) {
+            $("#uploading_" + id).show();
+        };
+        $(document).ready(function () {
+            $(".icon.next").html(">>");
+            $(".icon.prev").html("<<");
+        });
+    </script>
+}

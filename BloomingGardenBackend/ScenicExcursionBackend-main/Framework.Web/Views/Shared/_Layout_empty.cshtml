@@ -1,0 +1,19 @@
+﻿@using Framework.Web.CommonCode.Helpers
+<!DOCTYPE html>
+<html>
+<head>
+      <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link href="@Url.StyleSheet("styles.css")" rel="stylesheet" />
+    <link href="@Url.StyleSheet("paginate.css")" rel="stylesheet" />
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/CPSiteJavaScript")
+    
+    <script src="@Scripts.Url("~/scripts/rte/ckeditor/ckeditor.js")"></script>
+</head>
+<body style="margin:0px; padding:0px;">
+      @RenderBody()
+</body>
+</html>

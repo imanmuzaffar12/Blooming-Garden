@@ -1,0 +1,51 @@
+﻿@using Framework.Web.Models;
+@model RolesRightsModel
+
+<div class="col-sm-12">
+    <table class="table table-bordered table-striped table-DT dataTable no-footer" id="rolesRightTable" role="grid" aria-describedby="DataTables_Table_0_info">
+        <thead>
+            <tr role="row">
+                <th name="name">Name</th>
+                <th name="checkbox" class="text-center" width="50">
+                    <input type="checkbox" class="check-select-all-p">
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entity in Model.Entities)
+            {
+                foreach (var right in Model.Rights)
+                {
+                    string checkedCondition = string.Empty;
+                    if (Model.RolesRights != null && Model.RolesRights.Count != 0 && Model.RoleID.HasValue)
+                    {
+                        checkedCondition = Model.RolesRights.Where(x => x.RightID == right.RightID && x.RoleID == Model.RoleID.Value && entity.EntityID == x.EntityID) != null && Model.RolesRights.Where(x => x.RightID == right.RightID && x.RoleID == Model.RoleID.Value && entity.EntityID == x.EntityID).Count() != 0 ? "checked=checked" : string.Empty;
+                    }
+                    <tr role="row">
+                        <td>@right.RightName @entity.EntityName.Singlofy().Sentencify()</td>
+                        <td width="50" class="text-center">
+                            <input type="checkbox" class="check-select-p" @Html.Raw(checkedCondition) onclick="AddEntityRoleRight(this);" EntityID="@entity.EntityID" RightID="@right.RightID">
+                        </td>
+
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.check-select-all-p').change(function () {
+            $('.check-select-p').prop('checked', $(this).is(':checked'));
+            CheckedAll();
+        });
+        $("#rolesRightTable").dataTable({
+            "pageLength": 200,
+            "columns": [
+                { "name": "name", "orderable": true },
+                { "name": "checkbox", "orderable": false }
+            ]
+        });
+    });
+</script>

@@ -1,0 +1,185 @@
+﻿@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout_basic.cshtml";
+}
+<main>
+    <!-- main content -->
+    <div class="main-container app-wow">
+        <div class="container h-100">
+            <div class="row align-items-center h-100">
+                <div class="col-12 mx-auto">
+                    <div class="py-8">
+                        <div class="auth-box">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="d-flex align-items-center justify-content-center warning-gradient text-secondary px-4 py-6 h-100">
+                                        <div class="text-center">
+                                            <h5 class="text-uppercase">Welcome to</h5>
+                                            <h1 class="text-uppercase display-6">Blooming Garden</h1>
+                                            <span class="lead-1 fw-400">Admin Panel</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="px-4 pr-md-7 py-6 pl-md-0">
+                                        <h4 class="mb-6 text-light">Login</h4>
+                                        <div>
+                                            <form class="input-light" id="loginform" method="post" action="#">
+                                                <div class="input-group mb-5">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                    </div>
+                                                    <input type="email" class="form-control" id="UserName" name="UserName" placeholder="Email Address">
+                                                </div>
+                                                <div class="input-group mb-5">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                                    </div>
+                                                    <input type="password" class="form-control" id="pass" name="pass" placeholder="**********">
+                                                </div>
+                                                <div class="form-group d-flex justify-content-between">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked="" id="rememberMeCheck">
+                                                        <label class="custom-control-label" for="rememberMeCheck">Remember me</label>
+                                                    </div>
+                                                    <a class="text-secondary fw-500 small-2" href="/forgot-password">Forgot password?</a>
+                                                </div>
+                                                <div class="form-group d-flex mb-0 mt-6">
+                                                    <button class="btn btn-warning" type="submit">Login</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- Bootstrap 3.3.7 -->
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.cookie.js"></script>
+<script>
+    toastr.options = {
+                    "debug": false,
+                    "positionClass": "toast-bottom-right",
+                    "onclick": null,
+                    "fadeIn": 300,
+                    "fadeOut": 1000,
+                    "timeOut": 2000,
+                    "extendedTimeOut": 1000
+                };
+    $(document).ready(function () {
+        $.removeCookie("@Framework.Web.CommonCode.Helpers.Authentication.UserID", { path: '/' });
+        $.removeCookie("@Framework.Web.CommonCode.Helpers.Authentication.MD5Hash", { path: '/' });
+        loginOnsubmit();
+        $("#forgotpass").click(function () {
+            $("#passrow").addClass("n-display");
+            $("#loginrow").addClass("n-display");
+            $("#btnCancel").removeClass("n-display");
+            $(".btn-blue").val("Send me Password");
+            $(".lh h2").html("Forgot Password");
+
+            getPasswordOnsubmit();
+        });
+        $("#btnCancel").click(function () {
+            $("#passrow").removeClass("n-display");
+            $("#loginrow").removeClass("n-display");
+            $("#btnCancel").addClass("n-display");
+            $(".btn-blue").val("Login");
+            $(".lh h2").html("Login");
+
+            loginOnsubmit();
+        });
+    });
+    function getPasswordOnsubmit() {
+        $("#loginform").unbind("submit");
+        $("#loginform").submit(function () {
+
+            validateForm();
+            if ($("#loginform").valid()) {
+                var jqxhr = $.ajax({
+                    type: "POST",
+                    url: "/Authentication/forgetpassword",
+                    data: { EmailAddress: $("#UserName").val() },
+                })
+                .done(function (data) {
+                    showMessage(data, false);
+                })
+                .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                    showMessage("The Email address or the Login Name is not found in the system.", false);
+
+                })
+                .always(function () { });
+
+                return false;
+            }
+            else {
+                return false;
+            }
+            return false;
+        });
+
+
+    }
+    function loginOnsubmit() {
+        $("#loginform").unbind("submit");
+        $("#loginform").submit(function () {
+            $(".preloaderWrapper").addClass("preloaderIn");
+            validateForm();
+            var d = { EmailAddress: $("#UserName").val(), Password: $("#pass").val(), RememberMe: $("#rememberMeCheck").prop("checked") == true ? "on" : "" };
+            console.log(d);
+            if ($("#loginform").valid()) {
+                var jqxhr = $.ajax({
+                    type: "POST",
+                    url: "/Authentication/loginjson",
+                    data: d,
+                }).done(function (data) {
+                    $(".preloaderWrapper").removeClass("preloaderIn");
+                    $(".preloaderWrapper").addClass("preloaderOut");
+                    if (data.Link == "Failed") {
+                        toastr.error(data.Message);
+                    }
+                    else {
+                        toastr.success(data.Message);
+                        document.location.href = data.Link;
+                    }
+                })
+                    .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                        toastr.error(data.Message);
+
+                })
+                    .always(function () {
+                        $(".preloaderWrapper").removeClass("preloaderIn");
+                        $(".preloaderWrapper").addClass("preloaderOut");
+                    });
+                return false;
+            }
+            else {
+                return false;
+            }
+        });
+    }
+
+</script>
+<script>
+
+    function validateForm() {
+        $("#loginform").validate({
+            rules: {
+                UserName: { required: true, maxlength: 128 },
+                pass: { required: true, maxlength: 16 }
+            },
+            messages: {
+                UserName: { required: "Please enter email address", maxlength: "Email address should not exceed 128 characters" },
+                pass: { required: "Please enter your password", maxlength: "Password character should not be more then 16." }
+            },
+            errorElement: "div"
+
+        });
+    }
+    validateForm();
+</script>

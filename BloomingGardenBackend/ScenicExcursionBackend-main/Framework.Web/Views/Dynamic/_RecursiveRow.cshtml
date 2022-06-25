@@ -1,0 +1,102 @@
+﻿@model Framework.Web.Models.DynamicPageModel
+@{
+    var keys = Model.PageInfo.Fields.OrderBy(x => x.GridOrder).Where(x => x.AllowInGrid).Take(5);
+    
+}
+<ul class="@Model.CurrentLevel level2 clear" relf-sortable="yes" style="display:none;" id="pk_@Model.CurrentRow[Model.PageInfo.PrimaryKeyField.Name].ToString()">
+    @foreach (var childRow in Model.ListingData.OrderBy(x => x[Model.PageInfo.DisplayOrderField.Name]).Where(x => x[Model.PageInfo.ParentField.Name] != null && x[Model.PageInfo.ParentField.Name].ToString() == Model.CurrentRow[Model.PageInfo.PrimaryKeyField.Name].ToString()))
+    {
+        if (childRow == null || childRow.Count == 0)
+        {
+            continue;
+        }
+        var keys2 = Model.PageInfo.Fields.Where(x => x.AllowInGrid).Take(5);
+        bool isFirst = true;
+        <li class="row" relf-pkvalue="@childRow[Model.PageInfo.PrimaryKeyField.Name].ToString()">
+            <i class="icon child"></i>
+            @foreach (var col2 in keys)
+            {
+                string icon = isFirst ? "<i class='icon child'></i>" : "";
+                isFirst = false;
+                if (childRow.ContainsKey(col2.Name))
+                {
+                    if (col2.IsForeignkey)
+                    {
+                        var fee = Model.PageInfo.Fields.Where(f => f.Name == col2.Name).FirstOrDefault();
+                        string val = "";
+                        foreach (var drow in fee.RefrencedTableData)
+                        {
+                            //if (!string.IsNullOrEmpty(fee.ValueColumnName) && drow.ContainsKey(fee.ValueColumnName) && row.ContainsKey(col.Name))
+                            try
+                            {
+                                if (drow[fee.ValueColumnName].ToString() == childRow[col2.Name].ToString())
+                                {
+                                    val = drow[fee.TextColumnName].ToString();
+                                }
+                            }
+                            catch (Exception ex) { }
+
+                        } 
+                <span class="colum @col2.DisplayName.Replace(" ", "-").ToLower()">@val&nbsp;</span>
+                    }
+                    else
+                    {
+                        if (col2.IsBoolean)
+                        {
+                            string icc = bool.Parse(childRow[col2.Name].ToString()) ? "success" : "failed";
+                <span class="colum @col2.DisplayName.Replace(" ", "-").ToLower()"><i class="icon @icc"></i></span>                            
+                        }
+                        else
+                        {
+                <span class="colum @col2.DisplayName.Replace(" ", "-").ToLower()">@Html.Raw(icon) @childRow[col2.Name]&nbsp;</span>
+                        }
+                    }
+                }
+                else
+                {
+                <span class="colum">-</span>
+                }
+            }
+            @if(Model.ListingData.OrderBy(x => x[Model.PageInfo.DisplayOrderField.Name]).Where(x => x[Model.PageInfo.ParentField.Name] != null && x[Model.PageInfo.ParentField.Name].ToString() == childRow[Model.PageInfo.PrimaryKeyField.Name].ToString()).Count() != 0)
+            {
+                <span class="colum">
+                        <a relf-show="@childRow[Model.PageInfo.PrimaryKeyField.Name].ToString()" class="btn-yellow"><span>Show</span> <i class="arrow"></i></a>
+                </span>
+            }
+            else
+            {
+                <span class="colum">&nbsp;</span>
+            }
+            @if (Model.AllowEdit)
+            {
+                <span class="colum edit editcol"><a href="" relf-edit="@childRow[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" ><i class="icon edit" title=""></i></a></span>
+            }
+            else
+            {
+                <span class="colum">&nbsp;</span>
+            }
+            @if (Model.AllowDelete && Model.ListingData.OrderBy(x => x[Model.PageInfo.DisplayOrderField.Name]).Where(x => x[Model.PageInfo.ParentField.Name] != null && x[Model.PageInfo.ParentField.Name].ToString() == childRow[Model.PageInfo.PrimaryKeyField.Name].ToString()).Count() == 0)
+            {
+                <span class="colum delete deletecol"><a href="" relf-delete="@childRow[Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()]" relf-column="@Model.PageInfo.Fields.Where(c => c.IsPrimaryKey).Select(x => x.Name).FirstOrDefault()"><i class="icon delete"></i></a></span>
+            }
+            else
+            {
+                <span class="colum">&nbsp;</span>
+            }
+            <span class="colum re-order movcol"><i class="icon re-order"></i></span>
+            @{
+        Framework.Web.Models.DynamicPageModel model = new Framework.Web.Models.DynamicPageModel();
+        model.CurrentRow = childRow;
+        model.PageInfo = Model.PageInfo;
+        model.AllowAddEdit = Model.AllowAddEdit;
+        model.AllowDelete = Model.AllowDelete;
+        model.AllowEdit = Model.AllowEdit;
+        model.ListingData = Model.ListingData;
+                int l = int.Parse(Model.CurrentLevel.Split("_".ToCharArray())[1]);
+                model.CurrentLevel = string.Format("{0}_{1}", Model.CurrentLevel.Split("_".ToCharArray())[0], l + 1); 
+             }
+            @{Html.RenderPartial("_RecursiveRow", model);}
+        </li>
+                            
+    }
+</ul>

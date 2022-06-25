@@ -1,0 +1,46 @@
+﻿@model DynamicSetupScreen
+@using Framework.Web.CommonCode.Helpers;
+@using Framework.Shared.Enums
+@{
+    ViewBag.Title = Model.DS_Title;
+}
+
+@{Html.RenderAction("TableForm", "Dynamic", new
+    {
+        tableName = Model.DS_TableName,
+        title = Model.DS_Title,
+        allowAddEdit = Model.DS_AllowAddEdit,
+        allowPreview = Model.DS_AllowPreview,
+        allowSearchFilter = Model.DS_AllowSearchFilter,
+        allowListingGrid = Model.DS_AllowListingGrid,
+        gridColumns = Model.DS_GridColumns,
+        allowDelete = Model.DS_AllowDelete,
+        allowEdit = Model.DS_AllowEdit,
+        excludeAddEditColumns = Model.DS_ExcludeAddEditColumns,
+        excludeSearchColumns = Model.DS_ExcludeSearchColumns,
+        showAddNewButtton = Model.DS_ShowAddNewButton,
+        gridTitle = Model.DS_GridTitle,
+        orderBy = Model.DS_OrderBy,
+        doNotRenderJavaScript = Model.DS_DoNotRenderJavaScript,
+        extenderName = Model.DS_ExtenderName,
+        dontLoadRecursiveData = Model.DS_DontLoadRecursiveData,
+        allowImport = Model.DS_AllowImport,
+        parentColumnNameForRecursiveGrid = Model.DS_ParentColumnNameForRecursiveGrid,
+        recordsPerPage = Model.DS_RecordsPerPage,
+        importURL = Model.DS_ImportURL,
+        manualcrud = Model.DS_ManualCrud,
+        filters = Model.DS_Filters,
+        disableSorting = Model.DS_DisableSorting,
+        showHistory = Model.DS_ShowHistory,
+        customJavaScript = Model.DS_CustomJavaScript,
+        allowApprovals = Model.DS_AllowApprovals,
+        condition = !string.IsNullOrEmpty(Model.DS_Condition) ? string.Format(Model.DS_Condition + "=" + Authentication.Instance.User.UserID) : string.Empty
+
+    });}
+
+@if (!string.IsNullOrEmpty(Model.DS_CustomJavaScript))
+{
+    <script>
+        @Html.Raw(Model.DS_CustomJavaScript)
+    </script>
+}

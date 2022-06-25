@@ -1,0 +1,45 @@
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\SmartSchool.Shared.dll.config
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\SmartSchool.Shared.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\SmartSchool.Shared.pdb
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\CreativeServices.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\log4net.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\Newtonsoft.Json.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\NLog.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\ServiceStack.Common.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\ServiceStack.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\ServiceStack.Interfaces.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\ServiceStack.Redis.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\ServiceStack.Text.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.Mvc.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.Razor.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.WebPages.Razor.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.WebPages.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\Microsoft.Web.Infrastructure.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.WebPages.Deployment.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\Newtonsoft.Json.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.Mvc.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.Razor.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.WebPages.Razor.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.WebPages.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\bin\Debug\System.Web.WebPages.Deployment.xml
+F:\Bits Collision\SmartSchool\CMS.Shared\obj\Debug\SmartSchool.Shared.dll
+F:\Bits Collision\SmartSchool\CMS.Shared\obj\Debug\SmartSchool.Shared.pdb
+F:\Bits Collision\SmartSchool\CMS.Shared\obj\Debug\SmartSchool.Shared.csprojResolveAssemblyReference.cache
+F:\Development\smartschool\CMS.Shared\bin\Debug\SmartSchool.Shared.dll.config
+F:\Development\smartschool\CMS.Shared\bin\Debug\SmartSchool.Shared.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\SmartSchool.Shared.pdb
+F:\Development\smartschool\CMS.Shared\bin\Debug\CreativeServices.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\log4net.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\Newtonsoft.Json.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\NLog.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\ServiceStack.Common.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\ServiceStack.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\ServiceStack.Interfaces.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\ServiceStack.Redis.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\ServiceStack.Text.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\System.Web.Mvc.dll
+F:\Development\smartschool\CMS.Shared\bin\Debug\Newtonsoft.Json.xml
+F:\Development\smartschool\CMS.Shared\bin\Debug\System.Web.Mvc.xml
+F:\Development\smartschool\CMS.Shared\obj\Debug\SmartSchool.Shared.dll
+F:\Development\smartschool\CMS.Shared\obj\Debug\SmartSchool.Shared.pdb
+F:\Development\smartschool\CMS.Shared\obj\Debug\SmartSchool.Shared.csprojResolveAssemblyReference.cache

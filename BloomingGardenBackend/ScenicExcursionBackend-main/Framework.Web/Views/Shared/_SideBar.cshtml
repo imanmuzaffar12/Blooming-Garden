@@ -1,0 +1,122 @@
+﻿@using Framework.Web.CommonCode.Helpers
+@using Framework.Shared.Enums
+@using Framework.Application.Services
+@using Framework.Application;
+
+@model List<MenuNavigation>
+@{
+    string imageUrl = !string.IsNullOrEmpty(Authentication.Instance.User.ProfileUrl) ? Authentication.Instance.User.ProfileUrl : "/assets/img/default-avatar.png";
+}
+<!-- sidebar -->
+<nav id="adminNav" class="main-sidebar p-collapsing-sidebar sidebar-fixed sidebar-left d-flex flex-column">
+    <div class="main-sidebar-inner" data-scrollbar="sidebar">
+        <ul class="sidebar-nav sidebar-nav-light-hover list-unstyled text-unset small-3 fw-600 content-list">
+            <li class="nav-item text-light transition active">
+                <a id="dashboard" href="/home/index" aria-expanded="false" data-toggle="collapse" class="sbr-collapse nav-link nav-link-border collapsed collapser">
+                    <i class="fas fa-desktop"></i> <span class="p-collapsing-title">Dashboard</span>
+                </a>
+            </li>
+            @foreach (var parentMenu in Model.Where(x => x.ParentMenuNavigationID == null).OrderBy(x => x.DisplaySeqNo))
+            {
+                bool isParentAllowed = IsParentAllowed(Model.Where(x => x.ParentMenuNavigationID == parentMenu.MenuNavigationID).Select(x => x.EntityID).ToList());
+                if (isParentAllowed)
+                {
+                    <li class="nav-item text-light transition active" parent-menu-id="@parentMenu.MenuNavigationID">
+                        <a href="#@parentMenu.MenuNavigationName.Singlofy().ToLower()" aria-expanded="false" data-toggle="collapse" class="sbr-collapse nav-link nav-link-border collapser collapsed">
+                            <i class="fas fa-desktop"></i> <span class="p-collapsing-title">@parentMenu.MenuNavigationName</span>
+                        </a>
+                        <div id="@parentMenu.MenuNavigationName.Singlofy().ToLower()" class="collapse nav-collapse">
+                            <ul class="list-unstyled">
+                                @foreach (var subMenu in Model.Where(x => x.ParentMenuNavigationID == parentMenu.MenuNavigationID).OrderBy(x => x.DisplaySeqNo))
+                                {
+                                    bool isChildrenAllowed = IsChildrenAllowed(subMenu.EntityID);
+                                    if (isChildrenAllowed)
+                                    {
+
+                                        <li class="nav-item">
+                                            <a href="@subMenu.LinkUrl" class="p-collapsing-title nav-link">
+                                                <span>@subMenu.MenuNavigationName</span>
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                                @if (Authentication.Instance.User.RoleID == (int)RolesEnum.Admin 
+                                    && parentMenu.MenuNavigationName == "User Management")
+                                {
+                                <li class="nav-item">
+                                    <a href="/configuration/rolesrights" class="p-collapsing-title nav-link">
+                                        <span>Roles & Rights</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </div>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</nav>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("a[href='" + document.location.pathname + "']").parent().addClass("active");
+        $("a[href='" + document.location.pathname + "']").parent().parent().parent().addClass("show");
+        $("a[href='" + document.location.pathname + "']").parent().parent().parent().prev().addClass("collapser-active").addClass("open");
+        if (document.location.pathname == "/home/index" || document.location.pathname == "/home") {
+            $("#dashboard").addClass("collapser-active").addClass("open");
+        }
+    });
+</script>
+<!-- /.sidebar -->
+@functions{
+    public bool IsParentAllowed(List<int?> entities)
+    {
+        bool isAllowed = false;
+        if (Authentication.Instance.User.RolesRights != null)
+        {
+            foreach (var roleRight in Authentication.Instance.User.RolesRights)
+            {
+                isAllowed = entities.Where(x => x.Value == roleRight.EntityID) != null && entities.Where(x => x.Value == roleRight.EntityID).Count() != 0;
+                if (isAllowed)
+                {
+                    break;
+                }
+                foreach (var entityID in entities)
+                {
+                    if (roleRight.EntityID == entityID)
+                    {
+                        isAllowed = true;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            Authentication.Instance.User.RolesRights = AuthenticationServices.Instance.GetUserRoleRights(Authentication.Instance.User.UserID);
+            Authentication.Instance.User.RoleID = (Authentication.Instance.User.RolesRights != null && Authentication.Instance.User.RolesRights.Count != 0) ? Authentication.Instance.User.RolesRights.FirstOrDefault().RoleID : (short)0;
+        }
+        return Authentication.Instance.User.RoleID == (int)RolesEnum.Admin ? true : isAllowed;
+    }
+    public bool IsChildrenAllowed(int? entityID)
+    {
+        bool isAllowed = false;
+        if (Authentication.Instance.User.RolesRights != null)
+        {
+            foreach (var roleRight in Authentication.Instance.User.RolesRights)
+            {
+                if (roleRight.EntityID == entityID)
+                {
+                    isAllowed = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            Authentication.Instance.User.RolesRights = AuthenticationServices.Instance.GetUserRoleRights(Authentication.Instance.User.UserID);
+            Authentication.Instance.User.RoleID = (Authentication.Instance.User.RolesRights != null && Authentication.Instance.User.RolesRights.Count != 0) ? Authentication.Instance.User.RolesRights.FirstOrDefault().RoleID : (short)0;
+        }
+        return Authentication.Instance.User.RoleID == (int)RolesEnum.Admin ? true : isAllowed;
+    }
+}
